@@ -1,0 +1,152 @@
+What does it mean for a function program
+to be correct? One possible answer would be that the
+definitions in the program satisfy certain laws.
+Often these laws are represented as equalities between terms.
+In this session and the next, you're going to see proof techniques that can show that
+a given set of operations satisfy certain laws.
+The material in these two sessions is an important dimension of functional
+programming because it demonstrates one of the core claims of FP,
+Namely, that it is more amenable to reasoning about programs.
+On the other hand, the programming parts in this course are not dependent on it,
+and none of the assignments that we are going to do will test this.
+So, if you want to go fast, you can skip the material in the next two sessions.
+On the other hand, EPFL students are required to learn this material because it
+will be used in the physical exams that we do here at EPFL.
+Recall the concatenation operation plus, plus on lists.
+What would it mean to say that plus, plus or the version concat that we've written
+is correct? When one criterion for correctness would
+be to say that plus, plus satisfies certain laws that we would expect from
+concatenation. The laws are that concatenation is
+associative, so I can put the parentheses here either to the left or to the right of
+a double concatenation, And that Nil is right unit and a left
+unit. That means, for any list xs, xs followed
+by Nil is xs, and Nil followed by xs is second xs.
+The question is, Given properties like these, how can we
+prove them? And the answer is, by a new proof
+principle that we're going to introduce now which is called structural induction
+on lists. So to introduce structural induction, it's
+good to first look at its close sibling natural induction.
+Natural induction is a proof principle that you apply when you want to proof
+something for all integers greater or equal some smallest integer b.
+The idea there is that to show a property that the property will hold for all such
+integers, you just need to show that it holds for the smallest element, b, for the
+base case, And then for all other integers, you need
+to show the induction step. The induction step is that if you have P
+of n, if you assume P of n, then you can conclude that P of n plus one also holds.
+If you have proven that, then, the principle of natural induction says that
+the property P holds for all integers greater or equal to b.
+So, here's an example to recap natural induction.
+We are looking again at factorial. So here's the usual definition of
+factorial. And we want to show that for all n greater
+or equal to four, we have that factorial of n is greater or equal to the power of
+two to the nth. So, instead of power, we also could use
+the mathematical notation two to the nth. So, we do that by proof of natural
+induction. The base case obviously is n4.
+= four, that's the smallest number we have to consider,
+And there we can just do it by simple calculation.
+Factorial of four is 24, and power of two to the fourth is sixteen, 24 is greater
+than or equal to sixteen. So, the case is established.
+For the induction step then, we assume that the property holds for n. So, we
+would assume that factorial of n is greater or equal to twonth.
+To The nth, and we have to prove the same
+thing for n plus one. So, let's see what we do.
+Factorial of n plus one is equal, or here, if we've widened that to greater or equal
+two n plus one times factorial of n, because that's how we have defined
+factorial, That's just in second clause in the
+factorial definition. And that is definitely greater than two
+times factorial n because we know that n is greater equal to four, so n plus one is
+greater equal to five. And finally, by the induction hypothesis,
+we know that two times factorial n is greater or equal than two times power of
+two to the nth, because our induction hypothesis was that factorial of n is
+greater or equal to power of two to the nth.
+And we can use that induction hypothesis freely in our proof.
+So finally, in the last step, we just simplify power, so, two times two to the
+nth is, as we know, the same as two to the n plus one.
+So, this is power two to the n plus one and that's precisely what we want to
+prove. Factorial n plus one is proven to be
+greater or equal to power of 2n plus one. So, it follows that the property holds for
+all integers n greater equal to four. So, one thing we've used here implicitly
+and quite liberally is that we have applied reduction steps as equalities to
+parts of terms. So, we have used a reduction in our proof
+of saying left-hand side equals right-hand side.
+That works because pure functional programs don't have side effects, so
+reducing a term is really equivalent to rewriting that term.
+There's no other effect to be taken account of.
+That principle is called referential transparency,
+It's an important tool for equational proofs of functional programs.
+So, let's look at structural induction now.
+The principle of structural induction is analogous to natural induction.
+The idea is that we want to prove a property, P, for all lists, xs.
+And to do that, we just need to show that P of the empty list holds,
+That would be the base case. And that second, for any list xs and any
+element x, we show the induction step which says, assume P of the list xs holds,
+then you need to show that P of x followed by the list xs also holds.
+So, instead of constructing numbers starting from a base case and adding one,
+we construct lists starting from the empty list and consing elements to the top of
+the list. So, back to our comcat example.
+We'd like to show that, for any lists xs, ys, zs, concatenation is associative.
+That means, we can put the parentheses here to the left or to the right.
+To do this, we use a structure induction on the list xs.
+From the previous implementation of concat that you see here, we can distill two
+defining clauses for plus, plus. We can say, well, if the first element xs
+is Nil and is followed by a list ys, then we get ys here.
+And the second clause would say, well, if the first list is x followed by xs1, and
+then ys, then the answer would be x followed by the concatenation of xs1 and
+ys. So, these two clauses here, they're
+directly derived from the implementation. Essentially, they codify what the
+implementation does. So, lets now look at the structure
+induction. The best case would be that our list xs
+equals Nil. So here, we would have, for the left-hand
+side, of our equation Nil, followed by ys, followed by zs. And that can simp, can be
+simplified to just ys, followed by zs. Why? Because of the first clause of plus,
+plus which says, Nil, followed by ys is ys.
+Let's look at the right-hand side of the equation, there we would have Nil follow
+up by, the parenthesis to the right, ys and zs.
+But, of course, again, we can evoke the first clause of plus, plus and simplify to
+ys plus za. So, we have an equality here, and here,
+and the cases is established. So, let's now turn to the induction step.
+As the left most list, we would have x followed by xs, and then ys, and then zs,
+and the left-hand side has all parenthesis going to the left.
+How can we simplify that? Well, one thing we can do is, we can pull
+the x out of the parenthasis with the xs. So now, xs would go with ys,
+And the x would be outside of that list. That we can do by the second clause of
+concat which says, concatinating a list that starts with x is a list that starts
+with x and contanition of the rest of the list.
+So, it was the second clause of concat that said that.
+Once we have that, what's the next step? Well, x is still within another head list,
+so we can involved the second clause of concat again.
+And now, we would have x leading the whole result of the concatination.
+So, what's the next step? Well, the next step would be that, look
+here, what you see is xs followed by ys, followed by zs.
+That's actually the left-hand side of our induction hypothesis which says, assume
+you have proven the equation already for the list xs.
+So, we can invoke the induction hypothesis and rewrite this expression here to the
+expression on the right-hand side. So, parenthesis here, now go to the right.
+And that's all we're going to do with the left-hand side.
+Let's now turn to the right-hand side. So here, we would have the parenthesis go
+to the right, ys and zs, let's concanatinate it and then we have on the
+left x followed by xs. What can we do with that expression?
+Well, one thing we can do is, again, involve the second clause of plus, plus to
+pull out the X from the first list here, And that gives x followed by xs, followed
+by ys and zs. And that is exactly the same as what we
+simplified the left-hand side to. So, the case and with it the property is
+established. Let's do an exercise.
+Let's look at the second law for concat, namely that Nil is the right unit for xs.
+Can you show by induction that, that law holds?
+And how many equations do you need for the inductive step?
+Two? Three? Or four? So, let's see how we would prove this.
+Let's do the base case first. So, the base case would be that the list
+xs equals Nil. Then we have on the left-hand side, Nil
+plus, plus Nil, and that is the same as Nil by the first clause of concat, and
+that is already what we need. So, we have a when, if xs equals Nil, xs
+plus Nil is the same as xs. So, let's have a look at the induction
+step. That will be x followed by xs. So, what we need to prove is that x
+followed by xs plus, plus Nil, that should be the same as x followed by xs.
+So, how would we go about that? Well, we have x inside a, a com, a cons here, so we
+can involve the first clause of plus, plus to put it out.
+So, that would be the x followed by xs plus, plus Nil. Second clause.
+And that can be simplified to just x followed by xs by the induction hypothesis
+because we know we can be allowed to assume that xs followed by Nil is xs,
+And that is what we wanted to achieve here.
+So, we have established the case. So, the answer to the question was, we
+need two steps to establish the inductive

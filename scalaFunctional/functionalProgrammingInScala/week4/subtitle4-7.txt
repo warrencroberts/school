@@ -1,0 +1,227 @@
+We've seen in the previous session that
+all our attempts of decomposition were failing because of one reason or another.
+In this session we are going to introduce a new tool in the functional program as
+tool box pattern matching. We will show how pattern matching is a
+good fit for the problem of decomposition. So remember the task we were trying to
+solve is find the general and convenient way to access objects in an extensible
+class hierarchy. The class hierarchy we were looking at was
+those of arithmetic expressions. We had a base trait expression.
+And then we had sub-classes for number and sum. Then later on we also added
+sub-classes for product and variable to that.
+And in terms of methods, we were looking at eval, that would evaluate one of these
+expression trees using its results. As well as show, that would show a string
+representation of the expression tree. And then finally simplify, which would do
+some algebraic simplifications of an expression tree.
+We've, we've seen three attempts previously and they all had some yes
+comings. The first one was the classification and
+access methods, there we observed a quadratic explosion of the methods we had
+to write. In this class hierarchy here there were 40
+methods that we had to write. The second one was type tests and type
+casts, that did the job but it was unsize at low level.
+And the third one was object oriented decomposition.
+That worked great for evaluation. Worked, worked also great for show, except
+that we had to touch all the classes to add a new method, but it didn't work for
+methods such as simplify, that require non local knowledge, of the, of the, of the
+tree. In this session, we will see a new way to
+decompose objects using pattern matching. An important observation here is that the
+sole purpose of test and access of functions was to reverse the construction
+process. That means when we construct a node such
+as, new sum of e1 and e2, where e1 and e2 are expressions.
+Then we pick a particular class of nodes sum, and we pick the arguments.
+And the purpose of decomposition is to recover what kind of constructor we used
+for the note. That it, whether it was a sum or a number,
+say, and what the arguments were. And that situation is, in fact, very
+fundamental and common. It's so common that many functional
+languages, Scala included automate it. And the technical term for this automated
+solution is pattern matching. So we get pattern matching and Scala by
+way of case classes. A case class definition is essentially
+just like a normal class definition, except that it's proceeded by the modifier
+case. So we write case, class, number, instead
+of just class, number. As before, this defines a trait expression
+and two concrete subclasses, number, and sum.
+But we get some added functionality by adding the modifier case.
+The first thing we get is that the Scala compiler will implicity and automatically
+add companion objects. One for number and one for sum.
+And those companion objects will contain factory methods that construct numbers or
+sum elements directly. You've seen last week that you can create
+factory methods like that simply by adding an apply function to an object. Because
+that will let you then write something like, for instance, number of two. We've
+seen last week that this term actually expands into number..apply Apply of two.
+So it will invoke the apply method that we have defined in this object.
+The gist of it is that you can then now construct objects simply by naming the
+class and the arguments, whereas the new keyword here you can drop.
+So, that's a syntactic convenience, but the orchard classes that we have here are
+now all empty. So, how can we access their components?
+And that's what we need pattern matching for.
+So, one way to see pattern matching is as a generalization of the switch statement
+from C or Java. In C or Java, a switch can only be applied
+to numbers, now we can apply to whole class heirarchies.
+In Scala, we use a slightly different some text,.
+Instead of switch e we write e match, and then come a number of cases.
+But to express Eval using pattern matching in Scala, what you would do is we would
+say, well, match the given expression. With a number of patterns, the first
+pattern will say well if it's a number of some given value n, then return that value
+the second expression would say well if it's a sum with sum operand e1 and then
+another operand e2 then evaluate the two operands and form the sum.
+So it's quite legible. So the general form of a pattern-matching
+expression is as follows: We'd start with a selector () expression e, then comes the
+keyword match''' and then come a sequence of cases.
+Each case starts with the keyword'case', a pattern, a right arrow and an expression.
+And the meaning of such an expression would be that we select the expression e
+is matched against all the pattern. The first pattern that matches would then
+lead to the corresponding expression being evaluated, and if none of the pattern
+matches, you would get an exception, which is called a match error.
+So what are patterns built from. One pattern we've seen was number of N so
+that consisted of a constructor that indicated a class and a variable that
+indicated the argument to that class. And in that case the argument to that
+class could be any integer we can't restrict that in the pattern.
+We could also write number of underscore. That would match the same things as the
+number of n but we wouldn't care what the argument was.
+Where as in the number of n the name n then serves to give us the numeric value
+of that number and underscore just means it's a don't care.
+You cannot refer to it later on. Patterns can also be constants such as one
+or true or abc. Or there could also be a constant set,
+let's say N, where N was, like, defined as well, N=2.2.so So we can use name
+constants as well as constant literals. And then you can take these building
+blocks, and compose com-, more complicated map- patterns from them.
+So one example for that would be a pattern that reads a sum of, let's say number one
+and the second operand would be a variable x. So that would match objects which are
+sums with their left operant that is a number.
+And the number needs to have a numeric value one.
+And the right operand of the sum needs to be a node of type Var.
+And the name field of the Var can be anything but after the pattern in the
+right-hand side where we then use the expression we can refer to x as the name
+of that variable. We'll see an example in a minute.
+So here's some of the fine print. One tricky bit is how to distinguish a
+variable such as N which can match anything from a constant.
+Such as N, Which, in this case, matches just the
+number two and nothing else. Syntactically, we need to find a way to
+distinguish one from the other. So the convention Scala uses here is that
+variables always must begin with a lower case letter.
+Whereas, constants should begin with a capital letter.
+The only exceptions here are the reserved words, null, true, and false.
+But these are literals that the compiler knows about.
+There's another restriction on variables, and that's that the same variable name can
+only appear once in a pattern. So for instance, sum of x,x is not a legal
+pattern, you have to write sum of x,y instead.
+So now we know what the form of match expressions and patterns is.
+The question is how are they evaluated. So let's take an expression of the form
+that we've seen that would match the value of the selector E with the patterns P1 to
+PN in the order they're written. On the next slide, we'll see what that
+means exactly, matching an expression with a pattern.
+If a pattern matches, then the whole expression is rewritten to the right hand
+side of the first pattern that matches. And when we do that, the reference is to
+pattern variables in the pattern here out of place by corresponding parts and the
+selector. But what does, does it mean that a pattern
+matches an expression? Well, we look at the possible forms of
+patterns to determine that. Let's say we have a constructive pattern.
+So, there's a class name and some arguments that would match all values of
+type C or a sub type of type C that's also legal.
+That have been constructed with arguments that, in turn.
+Match the patterns P1 one to Pn. If, if the pattern is a variable pattern, x, and
+that matches any value. And it also will bind the name of the
+variable x to this value. So, in the, in the associated expression
+we can then use x as the name for the value that is matched.
+And the third case was a constant pattern C, so this one matches any value that is
+equal to C, where equality is understood in the sense of equal sequels.
+So these rules might have sounded dry and difficult but it will all become clear if
+we look at an example. So let's look at an application of our
+evaluation function which I have put up here on the side with a trade sum of
+number one, number two as an argument. Well the first thing that we would do as
+usual is rewrite that application by the body of Eval, where the actual argument
+replaces the former parameter. So the result is this expression here.
+The E variable here gets substituted with the actual argument sum of number one, sum
+of number two. The next step is, we have to evaluate the
+match expression. What we need to do here is we have to
+match the selector expression against all the patterns.
+The first one doesn't match, because the constructor is different.
+The second one does match, Sum matches sum.
+And that means that the two variables, e1 and e2 will be bound to number one and
+number two. And after that, the expression, all
+expression will rewrite to the right hand side expression here, which is Eval one
+plus Eval two. So that means we're left with Eval. Now,
+instead of e1 we use, we would use number one.
+We, We would use number one.
+The, value that was bound to the variable and instead.instead Of e2, we use number
+two. So, the next step, then, would be that we
+have to rewrite the function application on the left here.
+So what we get here is this expression here.
+We have a selector of number one and the match expression, which is the right hand
+side of eval. And then that's the rest that we have to
+add to the result. If we look at the match expression then
+now we see the first pattern is the one that matches, the number is the same thing
+here. The variable end that's bound to one and
+that's the thing we return so one is the number we return and afterwards we need to
+do an eval of number which will give two as by the same reasoning as what we have
+seen just now. So, there always have to three.
+So far all our pattern matching methods were defined outside of the class
+hierarchy, so where there was decomposing classes from the outside.
+But it's also perfectly possible to have pattern matching methods inside the class
+hierarchy as methods of base classes themselves.
+Such as the Eval method that you see here. So that is just the same as the previous
+eval method except now we match on the receiver object itself.
+So you see how this stuff match. And instead of writing eval of e what,
+Of e here. It would be e1.eval because eval is now a
+method of, of, the trait expression. Either one is perfectly acceptable.
+Once you've done that you might also ask well what are the trade-offs to do it this
+way or with the previous object-oriented decompositions solution we've seen, where
+we had essentially be the base trait exper and the def eval, which was empty and then
+in some, there would be a def Eval, Which was concrete and in number there
+would be another. Both of these designs are perfectly fine
+and choosing between them is sometimes a matter of style, but then nevertheless
+there are some criteria that are important.
+One criteria could be, are you more often creating new sub-classes of expression or
+are you more often creating new methods? So it's a criterion that looks at the
+future extensibility and the possible extension pass of your system.
+If what you do is mostly creating new subclasses, then actually the object
+oriented decomposition solution has the upper hand.
+The reason is that it's very easy and a very local change to just create a new
+subclass with an eval method, where as in the functional solution, you'd have to go
+back and change the code inside the eval method and add a new case to it.
+On the other hand, if what you do will be create lots of new methods.
+But the class hierarchy itself will be kept relatively stable.
+Then pattern matching is actually advantageous.
+Because, again, each new method in the pattern matching solution is just a local
+change, whether you put it in the base class, or maybe even outside the class
+hierarchy. Whereas a new method such as show in the
+object oriented decomposition would require a new incrementation is each sub
+class. So there would be more parts,
+That you have to touch. So the problematic of this extensibility
+in two dimensions, where you might want to add new classes to a hierarchy, or you
+might want to add new methods, or maybe both, has been named the expression
+problem. The name actually comes from this very
+example of arithmetic expression, which served as a case study for the discussion.
+Let's finish with an exercise. We've talked about the show function, I
+would like you to implement it. So what I'm after is a show function that
+takes an expression and gives you a string that represents that expression.
+Okay. So let's see how we would do that.
+What I've given you here is, the hierarchy consisting of the trait expression and the
+two case classes number and sum that we've seen in the course before.
+What we're going to do is a worksheet in which we are going to implement the show
+function. So what should show be like?
+Well, we would want to do a pattern match on the expression.
+And then we would have two patterns. One was number.
+It could be any number x, and the other one would be some, call it left and right.
+And, In each case, we have to decide what we want to return.
+In the first case, we would just convert the number X to a string, and in the
+second case, we would just concatenate, the result of showing the left hand
+operand with a plus in the middle and the result of showing the right hand operand.
+So, if you show expression itself, we'd have type, we can type string.
+So let's test the function with some argument tree as expression.
+So, I would do show of, let's say, the sum of, number of one and number of 44.
+What would we get, are, we would get the string one plus 44 as expected.
+So if you haven't had enough of it yet, then here is another exercise for you,
+which is optional and much harder than the first one.
+The question is, if you add case classes Var for variables and prod for products,
+how would you have to change your definition of show?
+The challenge here is to get parentheses right.
+So let's say we have a tree such as a sum of a product.
+Of, a number two and a variable X. I'm not gonna bother to write numbers and
+variables in, in, the, the tree form. Then, what you would expect is that you
+could print that just like two times x plus y Whereas, if you reversed it, and
+you had a product of sum of 2x and y. Then what you'd want to see is two + x in
+parentheses times y. Because otherwise, if you would just write
+two times x plus y, that wouldn't reflect the structure of this tree.
+So the challenge is to put in the right number of parentheses, the minimal number
+of parentheses, so that the structure of the tree is reflected in the output
+stream.

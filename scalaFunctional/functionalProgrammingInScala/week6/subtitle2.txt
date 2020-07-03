@@ -1,0 +1,137 @@
+In this session, we are going to look
+at the question of how to handle nested sequences in
+combinatorial search problems. We're going to explore
+a handy new notation for these kind of problems namely For
+expressions. Higher order functions and collections often replace
+loops in imperative languages. Programs that use many nested loops then can be expressed often with combinations
+of these higher order functions. I will now show you that using an example. So the task is that, we want to find
+all pairs of positive integers i and j, such that j is less than i and i is bounded by some positive
+integer n and i + j is prime. So for instance, if n = 7, the pairs we
+want to find are 2 1, 3 2, 4 1, 4 3, and so on, because the sum of i and
+j in each case is a prime number. So in imperative programming language
+I probably would use two nested loops, one for the Is one for the Js together
+with a test whether the sum of i plus j is a prime number and
+the sum buffer to collect the results. But what would be a purely functional
+way to achieve same thing? So a natural functional way to do this
+would be to generate data structures bit by bit until we have generated
+the data structure that we need for the final result. So the first data structure that we
+want to generate is the sequence of all pairs of integers i, j. Such that the j and the i are within
+the bounds that we have specified. And then, once we have that sequence, we
+can filter it to keep only those pairs for which the sum i+j is prime,
+and then we're are done. So we're left with the problem
+how to generate the sequence of pairs of integers. And there the natural way to do this
+would be to first generate the integers i between 1 and n, n excluded. And then for each integer i,
+generate the list of pairs (i, 1), (i, 2) and so on until i, i minus 1. So once we have that,
+we can put it into code. The last bit can be achieved
+combining until and map. So we will try it 1 until n that gives
+us a list of i from 1 to n excluded. And then for
+each of these integers, we map it, call it i to a range that goes
+from one until i, i excluded. Call the index here, j and
+for each combination of i and j, that we have produced that way,
+we return the pair i and j. So, let's do that in the worksheet. I have opened a new worksheet,
+call it pairs and I want to try out to build
+the sequence of pairs. The first thing to do is set
+the upper limit, let's say n = 7. And then I copy this expression
+that I had on the slide. So what did I get here? Well, if I have a look at the right,
+then I get a vector of vectors, and each element of the vector is indeed
+an i with the j less than the i and both greater or equal to one, so
+I get the pairs that I wanted to produce. You might ask, well,
+why did I get back a vector of vectors? Well, if you look at the class hierarchy
+that we have seen in the last session, then you will see that range
+is a subtype of Sequence. Now the arrange that we started with,
+one until n, got transformed with a map, and
+that map produced a sequence of pairs. And of course, sequences of pairs
+are not element of range, so I needed some other representation. The representation I got was in fact
+a type that sits between sequence and range, it's called an index sequence. So this is actually a sequence
+that uses random access and the prototypical default implementation
+of an index sequence is just a vector. So, what the type inference had decided
+was to say, well I can't do with ranges, ranges can't contain pairs,
+so I go up the hierarchy and I take the next best type that happened
+to be an index sequence and the type the economically implementation of that
+type, and that happened to be a vector. So that's how you ended up
+with vectors of vectors. But we have seen that's still
+not the right thing to do. We want to generate just
+the single collection of pairs, not a collection of vectors. So what we need to do, is we need to concatenate all the element
+vectors into one single list of pairs. So let's see how that can be done. We can combine all the subsequences
+in our sequence of vectors of pairs using a foldRight with
+concatenation as the operation. So if we have a vector of sequences, that should And what we do is we combine them all
+using ++, the concatenation operation. And on the right hand side,
+you would have the empty vector. So that would work, that would give
+us a single sequence of pairs. There's also another method
+here that is useful. This is called xss.flatten. So, flatten does, essentially,
+the same thing as concat. It takes a collection of collections,
+and returns a single collection, containing all the elements
+in the sub-collections. And if the collection is a sequence, then the combination will be just the
+concatenation of these sub-collections. So a simpler way to express what we want
+is our pair generating expression and then we just follow that by .flatten. We're not done yet
+because we can apply a useful law. Remember the flat map function that
+we've seen in the last session? It takes a collection value function f and apply's it to each element of the excess,
+and then combines the result. So, flatMap is, actually,
+exactly the same thing as mapping f. So, that would give us a collection of
+collections, and then applying flatten, and map, followed by flatten, is exactly
+the pattern that we've seen here. So it's a map here followed by flatten. So we can contract the two
+to just use a flatMap here. So we would have one until n,
+flatMap the function that goes through each interval
+from one to i and forms the pair. So let's do that in the worksheet. Let's replace the call
+to map here by flatMap. And we would get what we want
+here in flat sequence of pairs. Now what we still need to do is
+we need to filter that sequence according to the criterion that the sum
+of the two elements of the pair is prime. So let's do that. Let's follow the expression with a filter,
+takes a pair, and it asks whether the following is prime. The pair, its first element plus the pair. Second element. And if you do that,
+then indeed we get the sequence we wanted, sequence of pairs of
+elements whose sum is prime. So here the sum is 5, 7, 7, 7, 11. All prime numbers. So this works, but it's sad to say
+that it makes most people's head hurt. Is there a simpler way to
+organize this expression that makes it more understandable? Well, one thing we definitely could try
+to do is name the intermediate results. So split out a large expression like
+that into several smaller ones. That's generally always a good move. But, it turns out, there's a more
+fundamental way, how we can express problems, like this, in a more high level
+notation that's simpler to understand. We can get to that next. So, we've seen that high-order functions,
+such as map, flatMap, or filter, provide powerful constructs for
+manipulating lists, and other collections. But we've also seen that sometimes
+the level of obstruction required by these functions make the program
+hard to understand. In this case,
+there's a patient in Scala that can help. It's called a For Expression. So let's introduce For
+Expressions by an example. We start with the class of
+person that we've seen before. That person has a name, which is a string,
+and an age which is the Int. To obtain the names of all
+persons over 20 years, you could write for
+p left arrow, that's get taken from persons if p.age greater 20,
+yield p.name. And in fact that expression is equivalent
+to the expression persons filter, such that the person p has an age
+greater than 20, and then map the filter expression such that for
+every person p, we get the packets name. The two expressions have
+about the same size but I would argue that this one is simpler
+to read and understand what it produces. For expressions, like this, are similar
+to for loops and imperative languages but there is an important difference. A for loop operates with a side
+effect that changes something, for expression doesn't, instead the for
+expression produces a new result and essentially each element of the result
+is produced by a yield expression here. So if you look at the syntax of for
+expressions, then here it is. So they are of the form for
+and then comes a sequence. You have generators of filters in
+parentheses and then comes a yield. And then comes the expression that
+produces the final result elements. So the sequence s can consist
+of generators and filters. A generator is of the form p left arrow e,
+where p is a variable or more generally a whole pattern and e can be
+an expression whose value is a collection. The idea is that we would let p range
+over all elements of the collection e. And the filter is of the form,
+if f where the f is a boolean expression. And the idea here is that the filter
+will bring more from consideration all elements where f is false. The sequence must always start with
+a generator, and if there's several generators in the sequence, the last
+generator is very faster than the first. While the first one steps through
+more slowly, and then for each element of the first, the second
+generator can be transversed and so on. There's a minor variation in the syntax. We can also write braces around
+the sequence of generators and filters. And then the generators and filters can be written on multiple
+lines without requiring semi-colons. If you write it with parenthesis,
+then, if you have several generators, we need to put a semi-colon between them. Now let's see this with two examples. The first example is our expression that gave us all pairs
+whose sum were prime numbers. So, that could be expressed
+simply like what you see here. We let i range from 1 until n. Will a j range from 1 until i. We demand that the sum of i
++ j must be a prime number, and then we yield the pair of i and j. I think,
+there's no contest which one is clearer. So, this one is rather crystal clear,
+whereas, the other one was quite convoluted. The second example I want you to do as
+an exercise, remember scalarProduct from last session so, that was
+the function that took two vectors of doubles multiplied to corresponding
+elements and then, some of the result, can you write a version of scalarProduct
+that makes use of a for expression? So, let's see how we would solve this. So, I write a for expression, for. What I want to do is, I want to let x and y range over the result of zipping the two vectors, xs and ys. And then, I want to return in each
+case the multiplication x and y. So that would give me the multiplication
+of corresponding elements in xs and ys. And then,
+all I have to do in the end is sum it up. So from the sum of the whole vector.

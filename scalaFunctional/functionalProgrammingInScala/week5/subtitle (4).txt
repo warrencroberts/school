@@ -1,0 +1,173 @@
+In this session, we'll continue our study
+of high-order list functions. We'll introduce a new class of such
+functions which are called fold or reduce combinators.
+There's several variance of these combinators, but what they have in common
+is that they insert and give an operator between adjacent elements of a list.
+Another common operation on lists is to combine the element of a list using a
+given operator. For instance, to take the sum of a list,
+you would put a plus between adjacent elements of the list or to take a product,
+you would use, multiplication operation between, adjacent elements.
+To cater for empty lists, so if n equals zero, we can, we, we deal with that by
+actually taking zero plus in the sum and, one times in the product.
+So each time we take the unit value of the operation as a first operation here on the
+left. So that way the, our definitions of sum
+and product can also deal with empty lists. And that, of course, can be
+implemented with the usual recursive schema,
+So could define sum takes a list of Int, and gives you a an Int. If the list is
+Nil, then we return the unit element zero, Otherwise, we return y plus sum ys.
+Again, you might ask how can I generalize that pattern, and in fact it can be
+abstracted using the generic method reduceLeft. So reduceLeft inserts a given
+binary operator between adjacent elements of a list.
+So, if you have a list of from x1 to xn and we say reduceLeft up and we would put
+an operator between each successive elements of the list.
+If we draw that as a tree, it would look like this one here,
+So we have a list of x1, X2 and so on until we have the last
+operation that's the last element of the list.
+Once we have reduceLeft, we can express sum and product with it.
+So sum just would be take the list that just starts with the zero and then
+following the list xs and reduceLeft with a plus operation.
+So it would look like as thing here, would be zero, X1 plus, plus x2 and so on,
+With a plus xn. And product would be the same thing except
+that at the lower left corner of this tree here you would have a one, and as an
+operation you would have a times. By the way,
+Instead of writing, functions like this one here, two parameters xy then x times
+y, Scala actually lets you write that also in a shorter way using underscores.
+So you could just write, underscore times underscore for this very same function.
+The idea is that every underscore represents a function parameter, so if you
+have several ones, then each one would represent a new parameter going from left
+to right. And the parameters then are implicitly
+defined at the next out of pair of parentheses.
+So that's why here you would read this expression as first saying, well, this
+defines two parameters, x times y. And here are my parentheses, so that's
+where I insert the parameters x and y that I have just synthesized and that gives us
+precisely the function that you see here. So sum and product can, in fact, be
+expressed even shorter, like this. Sum would be zero followed by xs,
+reduceLeft with a binary operation plus. And product would reduceLeft with a,
+binary operation times. So, by its very nature, reduceLeft can
+only be applied to non-empty lists. There's a more general function which is
+called foldLeft, which can also applied to empty lists.
+The idea is that forwardLeft takes an operation and a so called accumulator or
+zero element zet as an additional parameter and that zero element would be
+returned if the list is empty. So the idea here would be that you would
+use foldLeft like this. Here would be a list, then you would call
+foldLeft with the zero element and then you would apply the operation as an
+additional argument. And that would then expand to the following tree here,
+And let's say we have the zero element and x1, and that would be combined with the
+operation, and then the other operation would take x2 and so on until finally the
+last topmost operation, would combined the result of all the previous elements with
+the last element as right upper. So, sum and product can also be defined as
+follows, using foldLeft instead of reduceLeft. For sum, we say fold with a
+plus and zero element is zero, and for product, we fold with a times and the unit
+element is a one. So here you see some possible
+implementations of foldLeft and reduceLeft as methods in class list.
+So reduceLeft, let's look at the type first.
+It would take an operation that takes two operands of the list element type and
+returns a result of the type and the result of reduceLeft is again, the list
+element type. The list must be non-empty,
+So in the case of Nil, we throw an error, Nil reduceLeft.
+And if the list is non-empty, so it comes just of a head x and the tail xs,
+Then, what we do is we forward to the foldLeft method with a zero element x.
+So that's the element that will be returned when xs is empty and the
+operation we have pass to reduceLeft. Now that leaves us with foldLeft.
+So type of foldLeft is a bit more complicated.
+Let's ignore it for the moment. We'll get back to it.
+But let's look at the body. So if the list is empty, then foldLeft
+would return its zero element. Zeta.
+If the list is non-empty, then what we do is, we have another call to foldLeft with
+zero element that's now the operation applied to the former zero and the first
+element of the list. So lets draw this.
+So, in the first iteration, foldLeft would be applied recursively, with the
+accumulator of the first element of the list, which I call here x1, and the
+operation. Now, the second call would then apply the
+operation to the zero that we pass into the second call, this, this subtree here,
+and the second element of the list and so on. our accumulator grows with each
+recursive call to foldLeft, until finally we are,
+Have an accumulator that looks like that. And there are no further elements in the
+list, so the list is empty and in that case we would return the accumulator.
+So it's a classic loop with an accumulator that implements foldLeft.
+So let's look at the type of foldLeft now. So, we know that the list elements are all
+of type T, So I can write T: for each one of those.
+The zero can be of a different type, u. Then to make things work out, because that
+subtree here is the next zero, we must also have that the subtree has type u and
+so on. All the subtrees have type u, up to the
+result of the foldLeft. So that type annotated tree matches the
+types that you see here. Type u is arbitrary,
+Zero has the type u. The operation, then, must have the type
+that takes a u and a T to a u and the result of the final foldLeft operation is
+a u. Now we've seen that foldLeft and
+reduceLeft produce trees that lean to the left.
+So it would make sense to have a dual pair of operations that unfold to trees that
+lean to the right. These are called foldRight and
+reduceRight. Let's look at reduceRight first.
+So reduceRight puts an operator between adjacent elements, but now the parentheses
+go to the right, not to the left. So, visually represented as trees it would
+like, would look like this. So we would have the first operation takes
+x1, and the whole result of producing a foldRight of the rest of the list and at
+the end, I would xn minus one and xn here. So we get a tree that leans to the right.
+Foldright is, analogous to foldLeft. It takes, again, a zero element or an
+accumulator here, So we would, what we would see here, it
+would be something similar. It would be an operation that takes the
+first element. Then the second element of the list if it
+exists, and so on, until it finally it takes the final element of the list and
+combines it with the zero here. So, if the list is empty, reduceRight
+would be undefined, just as reduceLeft is not defined for empty lists.
+So if you look at the possible implementations of reduceRight and
+foldRight and class lists, then here they are.
+So for reduceRight, it takes again a binary operation from T, T to T.
+Would say for empty list, it's again undefined.
+If the list consist of a single element, then that's the element that's going to be
+returned. And otherwise, it's going to be the result
+of the operation applied to the first element of the list and a recursive call
+of reduceRight to the rest of the list. For foldRight, we have a small typo here,
+so it takes a type parameter which is a u and a zero element of type u and then an
+operation and it's, implementation will simply be for an empty list, we return
+zero element, as for foldLeft. For a non-empty list, we return the
+operation that takes the headed element of the list and the result of applying
+foldRight recursively to the tail of the list.
+So to expand it out, if we had a non-empty list, what we would get is, we would have
+the first element of the list x1 applied with operation of recursively applying
+foldRight to the tail of the list. So, let's say there's a second element x2,
+Again recursive call until finally we would have the last element,
+Then we would hit an empty list and the result of foldRight is set so you see the
+same right leaning tree that I've shown you on the previous slide.
+Quickly look at types so the xn's again all have type T's as before.
+The zeta is type u. And then, it follows that the operations
+must also return the same type u, because like the zeta, they are all used as a
+right-hand operand offer successive operation.
+And then u is also the type that is returned from foldRight.
+So foldLeft and foldRight produce different trees,
+Left leaning trees and right leaning trees,
+But maybe they produce the same result. In fact, if our operator is associative
+and commutative, One can show that foldLeft and foldRight
+are equivalent functionally, Even though there might be a difference in
+efficiency. But sometimes, only one of the two
+operators is appropriate. So we see this in an exercise.
+Here is another formulation of the concat function that you've seen before.
+So let's look at this in a little bit more detail.
+So, what we mean here is that we have, do a foldRight over a list xs with zero
+element ys and the operation is a cons. So let's draw that out graphically.
+So, we would have x1 operation cons, X2, operation cons, and so on,
+Until to, the end of the list operation cons,
+And then we would have the list ys. Okay.
+So, how can we represent the list ys? How can we write that out?
+So let's delete that here. Well, the way we write a list is, we write
+it as a tree of cons cells, So it would be y1 cons, y2 and so on,
+until yn and Nil. So what do we see here?
+Well, it's just a single list that consists of element x1 to xn and then y1
+to yn. So that, that shows us that, the operation
+cons here, with the ys as zero element, provides exactly the list that we need for
+the concatenation. Now, that was okay for foldRight.
+Can you replace foldRight by foldLeft here?
+In fact, you can but you should tell us what is goes wrong.
+The types might not work out, The resulting function might not
+terminate, Or the result might not be what you want.
+For instance, it could be the reversed of the result that, that you what to have get
+back from concat. .
+Okay. so, to answer this question, let's simply type the definition of concat to
+our worksheet and we place foldRight by foldLeft and we get the error message,
+value:: is not a member of the type parameter T.
+So, what happened here was well, we do a foldLleft over a list xs,
+So we apply the operation to each element of that list xs and that's a T and in fact
+the operation cons is not applicable to arbitrary elements, it's only applicable
+to lists. So that's why what the right answer is we
+would get a type error in this case.

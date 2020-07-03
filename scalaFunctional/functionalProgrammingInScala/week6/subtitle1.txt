@@ -1,0 +1,218 @@
+So far the only collection type
+we've dealt with was the list. In this session, we are going to make a tour of other kind
+of collections which differ from list, both in the functionality and
+in their performance profile. One thing will stay the same however, all the collections that we're going to
+study in depth are going to be immutable. We're going to start in this session by
+looking at different kinds of sequences. We've seen that lists are linear. Access to the first element is much
+faster than access to the middle or end of a list. The Scala library also defines
+an alternative sequence implementation called a vector. This one has a much more evenly
+balanced access pattern than list. Vectors are essentially represented
+as very, very shallow trees. To see how that works in detail,
+let's make a little drawing. So a vector of up to 32
+elements is just an array, where the elements are stored in sequence. Here I only draw four for simplicity but
+in practice it would go up to 32. Now if a vector becomes larger than 32
+elements, its representation changes. What you do then is you
+would have a vector of 32 pointers, two arrays of 32 elements. So again, I always abbreviate to four. And once that is exhausted,
+so once we have 32 times 32, so it would be 2 to the 10th,
+1024 elements full, then the representation changes again. And it would then become a vector
+of pointers to pointers to arrays of 32 elements, so
+everything would become one level deeper. You'll see what the principle is. So a vector with three levels then
+would go up to 2 to the 15th elements, a vector of four level, 2 to the 20th. Five level would give you 2 to the 25th,
+and six levels would give you 2 to the 30th, that is a billion elements and
+that's about as far as it can go. So let's analyze how much time
+would it take to retrieve an element at some index in that vector. You've seen for lists,
+it very much depend on what the index is. Fast for zero, slow, linearly slow, for
+indices towards the end of the list. Vectors are much better
+behaved here because to get an index of a vector of length 32,
+it's a single index access. If the vector has size up to about
+a 1,000, then it's just two accesses, so generally the number of accesses
+are the depth of the vector. And we'll see that that
+debt grows very slowly. A depth of six gives
+you a billion elements. So generally the formula would be
+that the depth of the vector is log to the basis of 32 of N,
+where N is the size of the vector. So we've seen that log to the basis
+of 32 is a function that grows very, very slowly. That's why vectors have
+a pretty decent random access performance profile much,
+much better than list. Another advantage of vectors is
+that they are fairly good for bulk operations that traverse a sequence. So such bulk operations could be for
+instance a map that applies a function to every element, or a fold that reduces
+addition elements with an operator. For a vector then you can do that
+in chunks of 32 and that happens to be coincide fairly closely to the size
+of a cash line in modern processes. So it means that all
+the 32 addition elements will be in a single cache line and
+that accesses will be fairly fast. For list on the other hand,
+you have this recursive structure where essentially every list element is in
+a con cell, with just one element and the pointer to the rest. And you have no guarantee that these con
+cells are anywhere near to each other. They might be in different cache lines and
+different pages so the locality for list accesses could be much worse than
+the locality for vector accesses. So you could ask if vectors are so
+much better why keep list at all? But it turns out that if your operations
+fit nicely into the model that you take the head of the recursive data structure,
+that's the constant time operation for list, whereas for vectors who have to
+go down potentially several layers. And then to take the tail to process the
+rest, again a constant type operation for lists, whereas for
+vectors it would be much more complicated. In that case, definitely, if your access patterns have this
+recursive structures, lists are better. If your access patterns are typically
+bulk operations, such as map or fold, or filter,
+then a vector would be preferable. Fortunately, it's easy to
+change between vectors and lists in your program because
+the two are quiet analogous. So we create vectors
+just like we create list, only we write vector where
+we had written list. And we can apply all the same
+operations of list, also to vectors, map, fold, head, tail, and so on. Except for the cons because cons in
+a list, that's the primitive thing that builds a list and that let's
+us pattern match against the list. Instead of a con, vectors have
+operations +; which adds a new element to the left of the list, and :+ which
+adds an element to the right of the list. So you see theses here,
+x +: xs creates a new vector with leading element x followed
+by all elements of xs. And xs :+ x creates a new
+vector with trailing element x, preceded by all elements of xs. So note that the colon always
+points to where the collection is, where the sequence is. So let's see what it would take
+to append an element to a vector. Again, vectors like lists are immutable,
+I can't touch the existing vector. I have to create a new data structure. So what I would do is I would
+take the last array here and create a new one which
+contains the given element. If the vector is completely full,
+I would have to create a new level but I would assume that there's
+still space left in the arrays. So that gives me a new
+array of 32 elements which I then have to combine somehow
+with the initial ray vector. I can't change the pointer
+from the orignal root to this array because that of
+course would change the old vector. So what I do instead is I
+create another copy here that points to this new element and
+it also points to the other elements that my
+previous copy pointed to. And that then would replace this one here. And finally, I need to create another
+root which points to my two copy, new copy and to the other
+immediate descendence of the root. And that finally would
+complete the construction. So the new vector now is in red, whereas
+the blue one wasn't touched at all. So if you analyse the complexity of that, then we see we have to create
+a new Object 32 element array for every level of the vector
+where we did the change here. So in our case here,
+three of these arrays would be created. Not as efficient as changing a thing in
+place, but we get something in return. We get really two copies
+of the vector that are both completely functional and
+that are not in each other's ways. So the complexity again is here,
+if you analyze it, again log 32 (N), but
+now it's object creation. So we create as many objects of width
+32 as we have levels in the tree. So vectors and lists are two
+implementations of a concept of sequence, which is represented in fact as
+a base class of List and Vector. So if you do a diagram of the collection
+classes, then what we would have here, here we have class List,
+here we have class Vector. And the two are subclasses
+of a class called Sequence. There are other collections
+in the Scala library as well. So beside sequences, we would also have
+Sets, which very much resemble the sets that you had looked at in your various
+homeworks, with a bit more functionality. And we'll also see
+a structure called a Map. So these will be covered
+in future sessions. Sequences, Sets, and Maps are all instances of
+a common base class called Iterable. So that's the start of
+the hierarchy of Scala collections. In fact, there are also some
+other things in the Scala library that look like a sequence. Arrays and strings both support
+the same operations as sequences, and they can be implicitly
+converted to sequences when needed. So to demonstrate that,
+let's go in the worksheet. I've defined an array, again, analogous,
+I have just written Array instead of list. And if I do that, then the worksheet would
+respond that I have defined an Array[Int] and here are the elements of the array. What I can then do, I can, for instance, apply a map function,
+just like I did apply a map for lists. And I would get the array
+with every element doubled. Another sequence-like structure
+is a string, so let's define one. And we can then apply, for
+instance, an operation like filter which gives us all the uppercase
+characters in the string. So this would give us just HW. So you see that the usual operations
+on sequences, like map or filter or fold or head or
+tail or takewhile, and so on, they all also work for arrays and
+strings, which is quite handy sometimes. So going back to our diagram,
+we would then have a String, And Array as further
+sequence-like structures. I draw a dotted line here because they're
+not really subclasses of sequence. They cannot be that because both string
+and array come from the Java universe, and of course a Java class that doesn't
+know that at some future time somebody would define a class
+called Scala.sequence. Another simple and
+useful kind of sequence is the range. A range simply represents a sequence
+of evenly spaced integers. There are three common
+operators to construct ranges. I can write 1 to 5 and that would give
+me the range of elements 1, 2, 3, 4, 5. I can also use 1 until 5. The until operator is exclusive
+in the upper bound, so the sequence would only go from 1 to 4. And I can also vary the step
+value by the by operator, so I could write 1 to 10 by 3 and that would give me the range of 1,
+4, 7, 10. Or the step could also be negative. So 6 to 1 by -2 would give
+me the sequence 6, 4, 2. Of course,
+ranges are not represented like arrays or vectors as sequences of elements. There's a much more
+compact representation. All we need to store for a range is
+the lower bound, the upper bound, and the step value. And these three values are just stored
+as fields in a single range object. So coming back to my diagram then, I would have one more implementation
+of sequence called a range. So now that we have sequences, it's time
+to look at some more operations that exist uniformly for all sequences
+including lists and vectors and ranges. The first operation is exists, so
+xs exists with a predicate p gives us true if there is an element in the sequence
+xs such that the predicate p(x) holds. Otherwise it would give us false. The dual of exists is forall, so that one would return true if p holds for
+all elements in the sequence xs. So if we look at the worksheet,
+for instance, s exists (c => c.isUpper) would return true because in fact there are two
+uppercase characters in the string. Whereas if we ask whether forall elements
+character is an uppercase character, we would expect to see false because there are also
+lowercase characters in the string. Another useful operation on sequence is
+this one that takes two sequences and returns a single sequence of pairs, pairs of corresponding
+elements of the two sequences. That operation is called zip, like the
+zipper that takes two single strands and combines them into a strand of pairs. So to try that out,
+let's create one sequence, val pairs =, let's create let's say a List(1, 2,
+3) zip, well, let's take our string s. What would we get here? Well, we would get a list of integers and characters that contains the three
+elements ((1,H), (2,e), (3,l)). So we have taken corresponding
+elements from the two sequences and put them into pairs of the result list. The dual of zip is unzip, so if we do pairs.unzip, what we will see now is
+a pair of two lists. The first list contains the first half
+of the pairs that we have seen, (1, 2, 3), and the second list contains the characters
+from the second half of the pairs. Good, so we have seen exists to unzip. The next useful function
+is called flatMap. It takes a collection xs and the function f that maps each element
+of xs to a collection by itself, and it would then concatenate all the results
+collections into one large collection. So let's see that in
+action in the worksheet. We could apply following flatMap over
+a string, so it takes a character and the string and it would give us back let's
+say A period followed by the character. So each character in the string
+gets mapped to a list but flat map will then concatenate all of
+the lists in the recent collection. Let's see how that would work. So what we end up with is in
+fact one of the string but now has a period in front of every
+character of the origin string. The last group of operations I want
+to cover are some utilities for order or numeric collections so
+if you have a collection of numbers, we can take the sum or
+the product of that collection and if you have a collection of order elements
+we can take the maximum or the minimum. I click test here, so
+xs.sum would give us 50 and xs.max would give us 44 as expected. So let's apply this new
+operation to some examples. The first thing I want to do is I want to
+list all combinations of numbers x and y where x is drawn from one interval. Let's say from 1 to M and
+y is drawn from another. So what I would do is I would
+cycle through the list 1 to M and I would do a flat map with
+what would I have to do here. Well, it would be, I have to go now
+through the second list 1 to N, and I need a map so for
+every element in 1 to N, I return a pair that consisting of x and y where x is drawn from the first range
+and y is drawn from the second range. So the next example to look
+at the scale of product so, scale of product of two vectors
+is the sum of the product of corresponding elements Xi and
+Yi of the 2 vectors. And we can take the mathematical
+definition and map it directly to code. So what we do is we
+first zip up the xs and the ys that brings corresponding
+elements together into pairs. And then, we have a map that performs
+the multiplication on each pair. So we have a pair xy,
+we pull out the first half, we pull out the second half,
+and we multiply it. And finally, we need to take the sum
+of the results of the multiplications. There's actually another
+way we can write that using a pattern matching function value. So instead of pulling out the elements
+of the pair with the selectors 1 and _2, I can also do use
+pattern matching on a pair. So here's how that would be written,
+I have again the xs of ys but then I map, be the function that reads
+in bases simply case x, y, so it's a pattern match against
+the pair which will always succeed by the way because I know that I get
+pair and then simply return x times y. So that generally is a shorthand for
+a match expression. So the function value of that consist
+of one or more cases embraces is actually exactly the same as a function
+value that takes up parameter and then matches on the parameter
+with the cases as they are given. Of course,
+the first version is shorter and probably also clearer in the second one. So here's an exercise for you. You know that a number is prime if
+the only devise is of the number of 1 and the number itself. What's a good high level way to write
+a test with a number as a prime number? For once, I want you to value
+conciseness over efficiency so I want you to express the test
+in the most abstract and mathematical manner possible,
+don't worry about it's deficiency. So we would have a test
+isPrime takes an int and returns a Boolean and
+that's how we define it. So to answer that quiz, simply look
+at the mathematical definition and translate it directly into code. So if a number is prime,
+if the only divisors of the number one and the number itself, that means for
+all other numbers between 1 and n, that number is not a divisor of n. So let's just express that here. So all other numbers between 1 and n, that would be the range 2 until n. And then, there's a forall that
+should hold for all of these numbers. Give it a name, let's call it d. So what should hold is
+that n modular d leads the rest which is different from 0. So that's a very high level and short definition of what it means for
+a number to be a prime number.

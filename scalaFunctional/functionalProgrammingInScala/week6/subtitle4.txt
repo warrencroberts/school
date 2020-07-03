@@ -1,0 +1,223 @@
+In this session we are going to look at
+another fundamental class of collections, associative maps. Maps are special in Scala in the sense
+that they are both iterables and functions. We're going to explore the fundamental
+operations of maps and are going to apply them to
+somewhat larger example. Another fundamental collection
+type in Scala is the map. Maps have two type parameters,
+one represents the key of the map and the value of the map, so
+it's essentially a data structure that associates key of the key type
+with values of the value type. Here are two examples, the first is
+a map of Roman numerals that associates strings I, V, X with the numeric
+values one, five, and ten, and the others are map of countries which
+associates countries with their capitals. So let's see this in the worksheet,
+if I evaluate this then what I get is two immutable map, the first from character
+int, the second from string, two string. And they have the values that
+I have entered into them. So the first that I have defined
+would be of type Map[String, Int]. It associates an int
+value with a string key. And the second Map[String, String]. It associates a string
+representing a country with a string representing its capital. So maps are iterables. But in fact, maps are also functions,
+and that's because the Class Map[Key, Value] also extends the function
+type from keys to values. That means maps can be used
+everywhere functions can. In particular, maps can be
+applied to some arguments, so for instance capital of country of
+US is a well formed application, looks like a function call,
+but maps are function. So that would give us back Washington. But what would happen if
+we applied the function to a value that is not a key in the map? So, for instance,
+capitalOfCountry("Andorra"). Well, let's try out. So what we get is not surprising,
+an exception, [COUGH] which reads
+NoSuchElementException. The key, andorra,
+was not found in the map. So, what can we do to query a map, without knowing whether it
+contains a given key, or not? In fact, what we do here is, instead of
+having a simple function application, we can call a GetMethod on the map. So, if we do that, then what we get
+here is a so-called option value. And it reads none, so it would say, well, it hasn't found anything
+that matches andorra. Whereas if we wrote, say,
+capitalOfCountry get "US", we would get another option value,
+which now read, some(Washington). So it's time to have a closer look
+at what these option values are. So in fact option is another standard
+type in this kind of libraries. Here is its complete definition. Option is a trait, it has type perimeter. And there is one case class and
+one object that was extended. So the case class is called Some,
+and it takes a value and it is an extension of Option[A],
+and None extends Option[Nothing]. So that means that an Option
+value can be one of two things. It can be a None,
+which means nothing was found. Or it can be a Some(x),
+where x is of type A here. And that means that something was found,
+and the thing that was found is the x here. Since options are defined as case classes, they can be decomposed
+using pattern matching. So if we wanted, let's say, to show
+the capital of a country without throwing a key not found exception,
+we could do something like this. We could get the country from
+the map capital of country and then, we could match the resulting option value. If it's Some(capital),
+we return the capital, if it's None, we return the string called missing data. And then, if we do showCapital("US"),
+we would get back Washington whereas, if we did showCapital("Andorra"),
+we would get back missing data. Options also support quite a few
+operations of the other collections. In particular, they support Map,
+flatMap, and filter, so you can run for expressions over them. And I invite you to play with them,
+and try out what you can do with them. For the examples that follow, we need two more operations of collections
+that both have analogs in queries. In SQL, these operations would
+be called groupBy and orderBy. orderBy orders the collection
+according to some criteria that can be expressed in the Scala libraries
+with methods called sortWith or sorted. So let's say we have a list of fruit here,
+and we want to sort it such that fruit with shorter names appear
+before fruit with longer names. So that we could write fruit sortWith and
+then our criterion is that the length of the first fruit must be smaller than
+the length of the second fruit. So that would lead to the following
+result, ("pear", "apple", "orange", "pineapple"). Or we could just sort a collection with
+the natural ordering that's called sorted. Natural ordering here is lexicographic so that would lead to the list
+that you see here. The other operation I
+want to cover is groupBy, which is directly available
+on Scala collections. What it does is that it
+partitions a collection into a map of collections according
+to some discriminative function. That's best seen by an example. So let's take my fruit list,
+and let's group it by head. So head would be the character that
+appears first in each of these strings. So what that gives me is a map that
+associates each head character, so p, a and o, that's the three,
+with internal list of all those fruit that have
+that character as the head. So p would now map to List(pear,
+pineapple). A would map to List(apple) and
+o would map to List(orange). So, let's do a more involved
+example using maps. What I want to do is
+look at the polynomials. A polynomial can be seen as a map
+from exponents to coefficients. For example, x3- 2x + 5 could
+be represented with a map that says at exponent 0, we will have a 5,
+at exponent 1 we have a -2, and exponent 3 we have a 1. Based on this observation, let's design design a class Polynom
+that represents polynomials as maps. So what I have here is
+a new worksheet that for every given the rough framework
+of this class of polynomials. So let's say each polynomial should
+take as a parameter and field, a Map from exponent Int
+to coefficient Double. And what I want to implement is
+a plus operation on polynomial. So let's turn to that. How would I add let's say two polynomials
+like this one here, and this one here. So what we need to do is we need to merge
+coefficients that have the same exponent. So what we would expect here is
+a polynomial where which had 0 was mapped to 3, 1 was mapped to 2,
+3 was mapped to the sum of 4 and 7, so that would be 11 and
+5 was mapped to 6.2. So how can I achieve that? Well, one idea would be I
+take one of the maps and then I add the adjusted coefficient
+of each of the second maps to it. Adding means replacing the binding of
+the same coefficient in the left map. So to define addition of two polynomials,
+what I can do is I can take the first map and try to add all
+the elements of the second map to it. Let's see how I would do that. Take the first map, so that's terms. Add I will try to achieve
+with concatenation. So I would take the terms of the other and that would give me a new map and
+I just have to wrap that in a polygon. Let's see what that would give. Wow, not much yet because my map
+doesn't really print very well. We just get the default output
+which just says it's a polynomial. So maybe let's work first on a good
+two string function of polynomial, we'll get back to addition afterwards. So to add a polynomial into a string,
+what could I do? Well, one thing to do it is I can
+take all the terms that I have and I convert each term into a nice
+expression with coefficient and exponent. So let's try to do that. I would have a for
+expression that takes the exponent and coefficient of each term in my terms list. And it would yield the coefficient followed by an x that's my variable, followed by an up arrow representing exponent followed by the exponent. And then I just have to concatenate
+all these elements together. With a + in the middle, so
+let's see how we're doing. Now we get something nicer, we get
+the polynomials that we can read here. One thing we notice is that
+they are not yet sorted. They can appear in any order. For instance,
+the last one starts 1,3,5,0 so we would like to have the terms in sorted
+order with the highest coming first. So one idea here would be to say,
+well take the terms, convert them to a list because we need
+a sequence to sort them, sort them, so that goes from small to large and
+reverse them in the end. So, terms to list, sorted, reverse,
+let's see what we get now. So, now the things are nicely sorted,
+5, 3, 1, 0. On the other hand, unfortunately
+the result is far from being correct. Let's see what we did here. We have the first exponent from
+the first polynomial, that's fine. Then we have cube term from
+the second polynomial but in fact what we really need is the the sum
+of the two cube terms in both polynomials. So what happened here is
+with the operation ++, what we did really was just
+to essentially superimpose the terms of the other
+polynomial on top of this one. So if the left polynomial didn't
+have a term with a given exponent, that was okay, we would just take the term
+of others and it would be correct. But if it did have a term with the same
+polynomial that time would be lost. What we need to do instead is, have a function that in that case would
+add together the two coefficients. So how would we go about doing that? Well, the best way to do it almost always
+in function programming is break it out into its own simple function. So we would say well,
+let's go over the other terms. And essentially map, call this adjust, for adjust the coefficient and
+that's a function we'll have to define. So we define adjust and
+that takes a term, so that would be a term and
+that's a pair of an int and a double. And we want it to return the adjusted
+term, again, a pair of an int of a double. So what do we need to do here? Well, we need to see whether the key
+of the term is already in the left map. So let's maybe pull out the key. So we say, val (exp, coeff) = term, so now we have nicely the two sides
+in a variable each by themselves. So what we must do now is find out whether the existing terms have already
+a coefficient that matches exponents. So let's do that. We say terms get exp match. In the case where this is
+yield Some(coeff1) say, we return a pair or a binding that goes from the exp to coeff + coeff1. And if there was nothing in the map, then we return the binding that goes from the exp to just the coeff
+of the second map. What we did here is that the arrow and
+the plus have the same precedence. But we need to put the parenthesis
+here like that, because of course we want to have the exponent
+map to the sum of the two coefficients. Okay, so now what we see is that the cube coefficient here reads 11,
+that's what we need. Good, so we're done with the addition, but it felt kind of heavyweight
+to do all this computation. Is there a simpler way? Well, indeed there is. So far,
+maps were always partial functions. Applying a map to a key value
+could lead to an exception if the key was not stored in the map. What if we could make map's total
+functions that would never fail, but would give us back some default
+value if the key wasn't found. There’s an operation that does that,
+it's called withDefaultValue and that operation turns a map
+into a total function. So if you had written for instance cap1
+= capitalOfCountry withDefaultValue "<unknown>", then we could have
+safely applied cap1("Andorra") and we would have gotten back "<unknown>"
+because that's with a default value. No more key note found, exceptions. So let's apply this
+technique to our worksheet. What I will do is that I will
+instead of having a terms field, I just call this a term zero parameter. That will create a new field, terms, which is terms0 withDefaultValue 0.0. So now all my polynomials have
+maps that have a default value. We can try to test that by calling p1,
+first polynomial, .terms of some exponent that's missing. And we would get back a 0.0
+instead of the exception that we would have expected to see before. With the new map with default values, we
+can greatly simplify the adjust function. We need no longer test where the terms
+contains are given exponent or not. Can delete all that, and replace it with a simple return expression
+that says, I have given the exponent. I associated with the coefficient of my
+second map plus whatever the coefficient was in my first map, and
+that would be just terms of exponent. And I get back the same
+polynomials as before. So you see there's great power in working
+with maps that have default values. Often the code that deals with
+them can be greatly simplified. So far so good But there's still
+something slightly un-nice about that, and that's the way we
+had to create polygons. You wrote new Poly and then we have
+to pass a map into each polygon. Is there a nicer way that
+ideally would let us avoid the intermediary data structure,
+so ideally we could just write Poly of 1220, 3240, 5262. But for the moment of course,
+that doesn't work, because Poly takes a map as parameters and here we have what,
+well we have three pairs of int. And double elements. The problem of course is that we could
+have three, but we could have also four or any other number, of pairs that
+we pass as parameters to pulley. So we need a way to pass a varying number
+of parameters to the same function. In fact Scala does offer that ability
+with its use of repeated parameters. Now, let's show this with an auxiliary
+constructor in class Poly. We haven't seem them since week three,
+so it's a good time to refresh, so that auxiliary constructor would
+take a sequence of bindings. Each binding is a pair of Int and Double and the fact that it's
+a sequence is expressed. By the star here, so the star means it's a
+repeated parameter, that means we can pass an arbitrary number of concrete arguments
+for this form of parameter here. Internally, all the arguments
+are represented as a sequence. So that means that if we call
+now the primary constructor. What we can pass along is arguments that
+simply the sequence converted to a map. So if we do that then
+the spreadsheet compiles again and we get the same polynomials as before. We can also get rid of the map of course
+and the other cause to polynomial. So here's the final
+implementation of polynomials. As an exercise, I would like
+you to tweak this a little bit. So here we have expressed the addition
+operation with a concatenation of the terms of the two Maps where
+the second terms were adjusted. It is also possible to express
+the same operation with a foldLeft. And I'd like you to do
+that in the exercise. So what I'd like you to do is write plus
+as follows, it takes another polynomial, and creates a new polynomial where the,
+you apply a foldLeft operation. To the other terms as a collection and
+you have to figure out what the unit element here is, with an operation
+addTerm as the combining operation. And again, addTerm,
+I would like you to implement. Once you've done that, you are able
+to answer the following question. Which of the two versions do
+you believe is more efficient? The version using ++, or
+the version using foldLeft? So let's see how we would solve
+this problem in the worksheet here. So I'm going to start to work
+on the implementation of plus. We said it should have been other.terms
+foldLeft with some zero element. So what would that be? Well I'm going to argue it must be terms,
+because if other terms is empty, then clearly we want to return terms. So the zero element will be terms here,
+and the combining operation
+will be called add term. So I have to work on this one now. So addTerm takes now a zero element, so that's terms, a Map of Int and Double. And it takes a term that's taken
+from the other.terms list here, which is a pair of Int of Double. And again,
+it returns another map of Int and Double. So what would its implementation be? Well, in fact, we don't need to
+change much from what it was. So, all we need to do is that instead
+of returning a single binding, we immediately add this binding
+to the given terms Map. So we would return terms +
+the binding that we've seen here. And that does it, so everything compiles
+and we get the same results as before. So now to answer the question, which
+of the two versions is more efficient? So, I would argue the one with foldLeft
+is more efficient because what happens here is that each of these bindings will
+be immediately added to our terms Maps so, we build up the result directly,
+whereas before, we would create another list of terms
+that contain the adjusted terms and then we would concatenate this
+list to the original one. So the version with foldLeft
+avoids this creation of the intermediate list data structure,
+so in that sense. It looks like it's more efficient. So I would vote here for foldLeft.

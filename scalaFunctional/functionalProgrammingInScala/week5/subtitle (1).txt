@@ -1,0 +1,127 @@
+In this session we'll take a quick detour
+from the general topic of working with lists by introducing a new class of data
+structures, namely pairs and tuples. You'll see how pairs and tuples can help
+in program composition and decomposition, and you'll see that by using a somewhat
+larger example. We're going to demonstrate the material in
+this session with a somewhat larger example.
+The task is to define a function to sort lists that's more efficient than insertion
+sort. One good algorithm that's particular
+suitable for a functional list implementation is merge sort.
+The idea behind merge sort is as follows: if a list consists of zero or one
+elements, it's obviously already sorted so there's nothing to do.
+Otherwise, we separate the lists into two sub lists each containing around half of
+the elements of the original list. An easy way to do that would be to simply
+take the first n elements of the list and then the second n element of the lists if
+the lengths of the list is 2n. Once we have the two sub lists we sort
+them each in turn and then we merge the two sorted sub lists into a single sorted
+list. To see the algorithm in code, look at this
+function here. So we would have a function msort for
+merge sort. It takes a list of Ints for the moment we
+restrict ourselves to lists of a single type, and it returns a list of Ints The
+first thing is the splitting, so we take the length of the list divided by two,
+that's our n. If n is zero than, than the original
+length was zero or one, because division truncates towards zero.
+In both of these cases, the list is already sorted so we can simply return it.
+If n is not zero, Then what we do is we split the list at
+point N so we'll get to split that function in a moment.
+It returns essentially the first half of the list and the second half of the list.
+Then we sort both of these halfs with the recursive call to msort and finally we
+merge the two sorted lists. The definition of merge is here, is a
+function that takes two lists of Ints and we have left out its implementation so
+far. So if we look at an implementation of
+merge, then here's a possible one. We're going to improve that later.
+So merge takes two lists of Ints and it would proceed by a pattern match.
+First, on the left list, so if the left list is nil.
+Then the merge must consist of all the elements of the right list so we return
+ys. If the left list is not Nil so let's say
+consists of head element x followed by a tail xs1,
+Then we do a pattern match on the right hand list the ys.
+If that is nil then we can simply return xs.
+If that is not nil then we have two head elements x and y and two tail lists x is
+one and y is one. And what we do is we compare the head
+elements with each other. So if x is smaller than y, then obviously
+x must be the first element of our sorted lists, so we take x followed by a merge of
+all the remaining elements are from the excess list, that's excess one and all the
+elements of the ys list. If, on the other hand, x is not less than
+y, then we can take y as the first element of the sorted list, and we follow that by
+a merge of all the x elements followed by all the other y elements that the ones
+that follow y. So, that would be y is one here.
+So we've seen that the M sort algorithm made use of the split-end function.
+Let's take a closer look at this one. So the split it function on lists returns
+two sub lists, namely the elements of a given list up to the given index and the
+elements that start from that index. And those two lists are in fact returned
+in a pair. Now lets take a little time to look at
+pairs and their generalization tupples. A pair in Scala.
+Is written just x and y, where x and y are the elements of the pair.
+So here's an example, you could form a pair from the string answer and the
+number. 22.
+Call it pair, and the worksheet would respond that we have just formed a pair of
+type string comma int in parentheses. So, that's the type of this pair.
+And the value of that pair is obviously the string answer, and the value 42.
+So that was a way to form pairs. We can also decompose pairs using pattern
+matching, so that you see down here. We can type pair and we can match it
+against the pattern that contains two variables, label and value in a pair.
+And the worksheet would answer that we have just defined a label which is a
+string and its value is answer. And we have defined a value which is an
+int and it's value is 42. This, of course, works analogously also
+for tuples with more than two elements. So, you can have triples, quadruples, and
+so on. So far, all the types we've encountered in
+Scala were really abbreviations for some instance of a class type.
+And tuples are no exception. In fact, the tuple type of t1 to tn in
+parens is just an abbreviation of the parameterized type,
+Scala.tuple n of t1 to tn, with, as type parameters.
+If we look at tuple expressions then E1 to EN and parens is equivalent to the
+function application skeletal tuple N of E1 to EN.
+And finally, a tuple pattern, p1 to pn, is equivalent to the constructor pattern.
+Again, scala.tuple n p1 to pn. To make that work, we have to have a look
+at the tuple class. So all the tuple classes are modeled after
+the following pattern that you see here for tuple two.
+It's a case class it takes t1 and t2 as parameters.
+And then tuple two would have two fields which are named underscore one and
+underscore two of types t1 and t2 respectively.
+That's almost all. The only other thing we need to do is work
+on the ways tuples are represented. We do not want to print them with tuple
+two so we override the two string function to give us back the usual tuple syntax, so
+open parentheses followed by the field separated by commas followed by a closing
+parentheses. So what this definition of the case class
+shows is that the fields of a tuple can in fact be accessed with names underscore
+one, underscore two, and so om up to the number of elements in the pattern.
+That means that instead of the pattern matching that we've seen.
+Say, now label value equals pair. One could also have written label equals
+pair.<u>11.</u> So the first element of the pair and value
+equals pair.<u>2.2.</u> But the pattern matching form is generally
+preferred, because it's both shorter and clearer.
+So, let's do an exercise. The merge function we've seen so far uses
+a nested pattern match and that was rather long and it was also not so nice because
+it didn't reflect the inherent symmetry of the merge algorithm.
+We had, first had to do at pattern match on the left-hand side and then a nested
+pattern match on the right-hand side but, for merge, it doesn't really matter what
+is left-hand and what is right-hand side. So.
+Let's rewrite merge using a pattern matching over pairs.
+So what I want to do here is, I want to have the same signature as merge, but I
+want to start off with saying, well, let's form a pair of xa, ys, and then match on
+the pair. So,
+How would I do that? To develop an answer for this quiz let's
+use the worksheet again. I've already opened a worksheet for merge
+sort and I've put the outline of the merge sort function as we've seen it so far in
+it. The definition of merge here is still
+missing, so let's work on that. So the suggestion was, let's do a pattern
+match on the pair xs ys. What kind of patterns would apply?
+Well, the first pattern that's interesting is if either one of the argument lists is
+nil. So the first one would be nil nys.
+In that case, if the first list x-s is nil, and then the second list y-s, is just
+arbitrary, then we always return y-s, because there's nothing to merge.
+Analogously, if the first list is arbitrary and the second list is nil, we
+always return x-s. So that leaves us with the third case,
+where we say that both lists are non-nil. Let's write it like that.
+So X followed by XX1 and Y followed by YS1.
+And then in that case what do we do. Well, we now need to compare X and Y.
+If it's less than then we know that X is the first element of our result and we
+follow that with merge XX1 and YS. And if that's not the case and Y is the
+first element. We then follow it with merge of XX and
+YS1. And what we have here is, it complains
+that we need to give a result type, which is correct.
+So now it should compile without problems, and we can now apply merge sort to some
+test data, so let's define nums equals list of two minus four, five, seven, one.
+Just to get some data here and we do msort of nums.
+And it did sort them, the way it was supposed to.

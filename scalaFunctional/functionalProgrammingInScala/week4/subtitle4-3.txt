@@ -1,0 +1,102 @@
+Now that we've seen how we can encode
+primitive types as classes, the only two fundamental types of values that are left
+are instances of classes and functions. What we're going to look at in this
+session is how function types relate to classes, and how function values relate to
+objects. In the last session, we've seen that
+Scala's numeric types and the Boolean type can conceptually be implemented like
+normal classes. But what about functions?
+Are functions special or are they also just objects?
+In fact, function values are treated as objects in Scala, not just conceptually,
+but in reality. What happens here is that the function
+type a arrow b is really just an abbreviation for the class scala dot
+function one ab. And that class is roughly defined, as you
+can see here. In fact, function values are already
+treated as objects in Scala not just conceptually, but really.
+The function type A arrow B is just an abbreviation for the class
+scala.function1, two type parameters, the A and the B.
+And that class is roughly defined as follows.
+So it's a trait in pack of Scala. It takes the two type parameters, A and B.
+And it has a single method which is called Apply.
+So apply the function to an argumentix of type A, yielding a result of type B.
+So functions are really objects with apply methods.
+What you've seen here was the definition of four functions of a single argument,
+but there are also classes, function two, function three and so on, for functions
+that take more parameters. Currently we have those function traits
+until 22 parameters, but in the future there might be more, or we might be more
+flexible in that. Okay, so we've looked at function types.
+What about function values? Let's look at an anonymous function like
+the squaring function here, which takes and X and returns X times X.
+What would that expand to in this object-oriented view of functions?
+Well, it would be a new class that we create here called this anonfun, I assume
+that the name is not used otherwise in the program.
+And that would be a subclass of my function one trait, Int, Int are the
+argument types. And the apply method then, would be one
+that takes an integer and returns the square of its argument.
+So that was the class that implements this behavior.
+Now all that's needed to do is create an instance of that class.
+That would be the object that represents this function here.
+So creating an instance is simply new and unfun.
+In fact, that definition is again quite common and there's a shorter syntax for
+it. It's called anonymous class syntax.
+So what we can do is, we can take essentially this part here And leave out
+the name, so we write just, new function one, and int, and the definition of that
+class. So that create a new instance of a class
+that I haven't bothered to give a name. That anonymous class syntax you actually
+find in Java as well, so both Java and Scala have the same syntax in, in for, for
+this construct. Okay.
+So now we've seen how we represent functions.
+But, what about then applications of these functions or function calls?
+So, let's say we have a function that was, started life as this anonymous function.
+So, it's an object. And now we apply it to two concrete
+arguments, A and B. What would that expand to?
+Well, what it would expand to is simply calling the apply method of the function
+value with the same arguments. So a complete object oriented translation
+of this code here, where you first create an anonymous function and then apply that
+function to the value seven would be, we create a anonymous class instance, with an
+apply method, name it F, and then call the apply method of F with the argument seven.
+So now you see that functions are objects. Does the same hold for methods?
+For instance, this apply method here. Would that, by itself, be an object?
+Well, that can't very well work. Because if apply was an object.
+Well, it would be an instance of this function class, which would be, have an
+apply method, which would be an object, Which would be an instance of this
+function class, which would have an apply method.
+You see the problem. We would get an infinite expansion.
+So what happens instead is that methods such as Def, F, Boolean.
+So anything that's defined with a Def are not, themselves, function values.
+But if the name of a method is used in a place where a function type is expected,
+it's converted automatically to the function value.
+And the conversion is just that we create an anonymous function like this one here.
+Which, where we say, well, give me an argument, and I apply the method to the
+argument. That anonymous function value we've seen
+how that expands to this new anonymous class. New function one in boolean with
+the apply method. So that's how.
+Functions really are treated in Scala. A technical term which you don't need to
+remember, but I just give it for completeness here.
+So this transformation here that converts the name F to this anonymous function,
+It's called, in lambda, calculus, eta expansion.
+So if you hear sometimes the word eta expansion, then you know now what it is.
+Let's do an exercise. In package week four, where we have
+defined previously the list class with its subclasses,
+I want you to define an object list with some functions in it.
+And the idea would be that users will then be, create lists of length,
+Zero, one, or two just with the syntax. So list of open parens, closed parens with
+the empty list. List of one would be the list of the
+single element one. And so on.
+So let's see how we would solve this. I've put up the list class that we've
+developed previously so the task was to develop an object together with that class
+that would give us that syntax that we could just call list of twelve.
+Lets say. So how would we do that.
+So idea is if we look at that syntax list is used in function possession.
+So what this would really expand to you know that would be list.apply12.
+So that means that we're asked to define a method called Apply.
+And in that case it would take two arguments.
+A, let's call it X1. Of type T and X2 of type T, so the T can
+be arbitrary, we have to parametrize apply with it.
+Then would return a list, so result type is list of t.
+And it would then return a list that consists of these elements.
+So that would be new of cons of x1 and new of cons of x2 and new of middle.
+And for the other two, for list of one and list of zero, the result would be
+analogous. So, I leave out list of with single
+elements. But, for the empty list, I simply have an
+apply method. It takes no arguments.
+I would give us.

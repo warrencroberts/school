@@ -1,0 +1,208 @@
+This session recapitulates materials and collections seen in the previous sessions
+in the context of a larger example. The task will be to design a program that
+converts telephone numbers to sentences. So here's the task. You know that phone keys have
+mnemonics assigned to them. If you look at your smart phone or
+another phone then you find that '2' gets associated with "ABC", '3' with "DEF",
+'4' with "GHI" and so on. Assume you're given a dictionary, which
+is a list of words that we call words for simplicity. What I want you to do is
+design a method translate, such that translate(phoneNumber)
+would produce all phrases of words that can serve
+as mnemonics for the phone number. So it's something like 1-800-CALLME on
+the folder words and the dictionary. So, here is an example, the phone number
+that is given by the digit string, "7225427386" should have the mnemonic Scala is fun as one
+element of the set of solution phrases. Why? Because the digit '7' has as one of
+he letters associated with it the S. 2 has both C and A, so that gives SCA. The 5 has the L so
+this gives SCAL and so on. So you see the principle. That's actually an example
+that has been studied before. I've taken it from
+a paper by Lutz Prechelt. Paper's called An Imperial Comparison
+of Seven Programming Languages. It appeared at IEEE Computer
+at 33 in (2000). At the time, the students were asked
+to solve this puzzle in a set of scripting languages and
+in a set of general purpose languages and then various measures were produced,
+like how long it took them, how many bugs, how long the program was,
+how fast the program was and so on. One fairly obvious outcome was that
+the scripting languages were shorter. About 100 lines of code for
+the solution, compared to 2, 200 or 300 lines of code for
+the general purpose of languages. There were a lot of other interesting
+findings in that paper, so if you come across it I
+encourage you to read it. So let's see how we would solve this
+problem in Scala using a websheet. I've already laid down some intermediate
+steps for you towards the final solution. The first thing we want to do is
+get a dictionary of useful words. We have put up one for
+you under the lamp.epfl.ch site, so here you find the full url. So that, using that url we
+can use the source object that we have imported from scala.io
+to get an iterator that can read in one by one all the characters
+in that, under that url. And the first thing we are going to do
+with that is we are going to call getLines and that will now give you an iterator
+that gives you back the strings that make up the individual words one by one,
+because in the dictionary, in fact, every word is its own line. Good, the next we have
+given is the mnemonics map, which is the same on every phone here. So it's just a map from character to
+string that contains the associations. That you know. So the first task to do then would
+be need to invert in next map. So now we [COUGH] wouldn't have our
+mapping from digit to character string. We want to have a mapping
+from characters to digits. Call that map charCode. So the question is how do
+we implement that map. Well, one thing we could do,
+of course, is write it down. You could say A maps to 2, B maps to 2 and so on for
+every letter in the alphabet. But that's a bit repetitive and
+it violates the so-called dry principle. Dry means don't repeat yourself because in a sense we have encoded
+the same information from this map twice. So in the unlikely In case,
+that the mnemonics bindings for phone would change some point to
+the future, we'd have to change '2' places in our program to reflect
+that instead of ideally, just one. So, let's do something that's shorter. So what we want to do is we want to,
+in a sense, invert this map. Now going from a map from the characters
+in the string here to the digits. So the way we can do that is with a for
+expression. So we let the for range over all
+the key value bindings in the map. So the key would be a digit,
+the value would be a string. And it comes from the map here. And then we still need to let
+the second generator range over all the possible
+letters in the string. So you say ltr < str and we yeild. What do we yield in that case? Well, we yield the binding that
+goes from the letter to the digit. And what you see here is now a Map that
+indeed Inverts the mnemonics maps that we've seen here. So, E goes to 3, X goes to 9 and so on. The maps are, as you know, unordered so
+these letters, these bindings will appear in any order that's convenient for
+the implementation to be stored. Good [COUGH], so that was step one. Step two is, I want to map not
+just a single character but a whole word to digit
+string it can represent. For instance the word
+Java should map 5282. Because J maps to 5,
+A maps to 2 and so on. So how can I achieve that? Well that's a simple map, right? They want to apply the same operation
+on every character in the word. So what I would write here,
+I would say, word map charCode. And that makes use of the fact that in
+fact maps like charCodes are functions themselves. You've seen that before, so we can use
+a map as a function of a map method. Okay, so we have wordCode, let's test it. WordCode of Java that
+gives us indeed 5282, but that was all uppercase,
+if you apply to a lowercase character, oops, we get a no such element
+exception key not found and the key that wasn't
+found was a lowercase a. While that's really understandable
+because after all, our map went only from upper case characters to
+digits, not from lower case characters. So the best way to correct it
+would be to simply convert the words toUpperCase using Java
+method on string toUpperCase. And that will do the trick. So now Java would map 25282 as we expect. Good, the next step then would
+be to go again the other way. So we know that Java maps to 5282. What I want now is a list of all the words that map to 5282,
+so I want to go the other way. I want to go from 5282 and I want to
+find all the words that map to it. And the same, of course,
+for every digit string. So I will call this another
+map called wordsForNum. And that then would be a map from strings, namely digit strings,
+to a sequence of strings. So that's a sequence of all the possible
+words that I have in this list. So how do I do that? Well, if you think about it, then
+really what we want to do is a groupBy. We want to group lists of
+words that have the same code. And we want to then,
+given the code, retrieve that list. So it's simply a words groupBy. And the function to be used as
+a discriminator function is wordCode. So here's a small glitch. The error message here says that
+the groupBy is not a member of the type iterator of string which
+is a type of words and that's true. The problem here is that words
+is an iterator which is the same as a Java iterator and
+it doesn't have a groupBy method. We haven't really covered
+iterators in this course because it's an imperative concept. So the best way to fix the problem here is
+to just convert the iterator to a list. And we can do that with
+the two-list method. So now words is a list and
+if we print it, then we see first, the output that we see the word list. So that looks like
+the prefix of a dictionary until the output exceeds
+the cut off limit. By the way, if you use the first
+version of the worksheet, then you will have gotten the same thing,
+that the output exceeds the cutoff limit. But then you wouldn't get any further
+output because there was a problem, that the cutoff limit was determined for
+the whole worksheet rather than for each command separately. If you see that problem, then you should update your worksheet and
+that will take care of it. So let's see what the worksheet gives us. Otherwise, we see here
+a NoSuchElementException that the key was not found and
+key not found was a minus. Let's try to track that down. What we see here, you see a stack of methods that all
+came from the collection error keys. And then the first method that
+we wrote was wordCode itself. So it seems that in wordCode, we pass
+a key to charCode that wasn't found. And the key here was a minus. CharCode, of course,
+takes care only of upper case letters, whereas minus is not a letter at all. So it seems the diagnosis is that
+our dictionary contains words that contain an embedded hyphen and
+our code here can't deal with those. So, I propose the best way to
+deal with that is simply to drop words containing hyphens or other
+non-letter characters from our word list. So, let's try to do that. So we say we have a word list that
+we want to retain all the words that only consist of letters. So retain would be a filter. And we would then say word for all. So all characters for
+the word are a letter. And if we do that,
+then we still get the same dictionary but scrolling down actually wordsForNum
+now gives us a draw map that has as a prefix
+the things that you see here. Okay, great. So almost the final thing to do now is to write function encode, and
+function and encode would return always to encode a number given
+it's a digit string as a list of words. So, it would give us a set of lists of
+strings, that's the words in each phrase. And the set contains all
+of the possible solutions. So, so far all our implementations
+of methods were some simple application of a method that's
+defined in the collection libraries. With encode, we're not so lucky so there's nothing directly that represents
+encode so we have to work on it ourselves. A good strategy here is if you
+are given data like a string or a list of something to always get take
+care of the boundary cases first. So the boundary case would be what
+do you do if the number is empty? What should you return then? The empty set? Well, the answer is no not really
+because the empty number does have a solution and it's the empty phrase. The empty phrase represents
+the empty number and the empty phrase would be just
+represented as an empty list. So I argue that should be the right
+result for empty numbers. Okay, so if the number is not empty,
+what do we do? Well, the new thing here is we're
+dealing with phrases instead of words. So, we need to determine essentially how
+many characters we take from this number to form the first word. And here we have a choice that
+number could range from one to the length of the number itself. So we could say, for split taken from 1 to number of length. So that's where we want
+to split our number. And, up to the characters, up to
+the split, would form the first word and the rest would form the other words. So let's see how we go on then. So, once we have a split, we can find
+out what the first word should be. So that word would come in
+wordsForNum of the number with the first split characters taken. So, we take first put characters from
+the number, we apply wordsForNum. So that gives us a sequence of all
+the strings that have this number and we let words range over that. Good, almost done. The other thing we need to do is to say,
+well once we have taken split characters of the number,
+we need to treat the rest of the number. So what we need to do is we need to do
+something with the number drop split. That's the rest of the number. And what do we need to do? Well, we apply encode to it. And once we have that,
+we can compose our solution. The solution would consist of
+the first word followed by the rest. So, we get an error here. The error message says
+that there's a type error, it found an index sequence and
+it required a set. Index sequence, you remember we got
+that because we started with a range and of course the result can't
+be represented as a range. So the scalar type inference that will
+widen the type in the next available one is index sequence which has vector
+as its primary implementation. So that's of course
+incompatible with a Set, so we have to convert
+the whole thing to a Set. And one way to do that,
+we could do that at the end, simply write toSet for the result here. And that would give us
+a valid encode method. So let's test encode. I have prepared a test case here, with the
+digit string, let's see what that gives. We get an NoSuchElementException,
+key not found: 7. So it seems we're not done yet. What happened here? Well, if you look at where
+the key wasn't found, it was in the encode function itself. So the map that we apply here is words for
+num. So obviously we have a key where that
+is not contained in the words for num map,
+that was the key was string seven. And that becomes clear if you
+look at the mnemonics map. So 7 maps to PQRS and indeed there's no single letter word that
+is consists of any of these four letters. So how can we fix that? Well, you have seen in a previous
+session that one way to deal with these key not found errors is
+to make your maps total. And we can do that for wordsForNum, we can
+make the map total by adding a default. So we say withDefaultValue. And what should be the default value B,
+well, we have a map to a sequence
+of all possible solutions. So I guess the empty sequence
+is a good default value. So essentially if a key is not in the map,
+then we say well, it doesn't have a word that's
+associated with that digit string. So if we do that, then indeed we do get
+a result and we get a number of phrases. The one we're after is this one here,
+Scala, is fun, is one of the possible solutions,
+so that's what we wanted here. You can play with other possible
+numbers and see what they give. Good, so one more thing to do,
+we got the solutions as a set of lists. But what I really would like to do
+is present them as complete phrases. So what I want to do is
+I want to write a method translate that gets a number. And returns a set of not
+list of strings but strings, where the string should
+be the whole phrase. So how do we do that? Well, we start with encode number and then for each solution,
+which is a list of strings. We have to present this solution as
+a phrase, so for each means we have a map. And the operation we want to
+apply is a mkString operation where we separate the words and
+the list with spaces. So let's see what that gives. If we now do translate of
+the digit string here. And indeed we get all solutions and
+phrases and one of them was the one we are after. So that's it. I hope you have gotten an impression
+how much fun it is to write programs in an interactive way using immutable
+data structures and functions only. In fact, I think that the immutable
+collections that you'll see in Scala and couple other languages are. Something that will play
+an increasingly important role for the future of programming in general. They're just too good not to happen. They're very easy to use, because generally a few steps
+are sufficient to do the job. They're very concise,
+typically one word replaces a whole loop. They're safe. So the type checker that you see now
+is really good at catching the errors. Typically errors we had when we wrote
+the program were key not found errors. That's true, that's one thing
+that type checker doesn't check. But a lot of the other annoying errors
+are already caught during compile time, you don't need to test
+your program to find them. The immutable collections
+are also pretty fast, because the collection operations
+are tuned in the library. And it turns out they can
+also be parallelized. And finally, the universal, that's one
+vocabulary that works on all kinds of collections from lists to vectors to
+rangers, to sequences, to sets, to maps. But also to further kind of collections
+like parallel collections or even distributed collections that you would
+typically attack with map views jobs. And I believe that makes them
+a really very attractive tool for software development.

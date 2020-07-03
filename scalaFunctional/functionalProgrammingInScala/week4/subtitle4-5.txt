@@ -1,0 +1,244 @@
+In this session, we're going to continue
+our exploration of subtyping and generics. In particular, we're going to discuss the
+important and somewhat tricky concept of variance,
+Which means how subtyping relates to genericity.
+The material in this session might be a little harder than what you've seen
+previously. If you want to go fast, and you don't need
+to know things to the last detail. Then it's perfectly fine if you just
+browse this session, or skip it completely.
+On the other hand, if you want to go to the roots, then this session is for you.
+As a bonus, we're going to develop a completely satisfactory model of cons
+lists that doesn't have any of the shortcomings that we have to deal with
+before. You've seen in the previous session that
+some types such as lists should be covariant.
+Whereas other types such as arrays should be not covariant.
+What's the difference between the two? Well roughly speaking the type list is
+immutable where as the type array is mutable because we can update its elements
+and immutable types can typically be covariant if some conditions or methods
+are met whereas mutable types can not. In this session we will find out precisely
+what the conditions are so when types that can be covariant and when they cannot.
+In fact, it's not just a binary choice between variant or not.
+There are actually three possible relationships between type instance c, of
+c and a, and c and b, where c of t is a parameterized type.
+And a and b are types such that a is a sub-type of b.
+So we could either determine that c of a is a sub-type of c of b.
+Or we could determine the opposite relationship, which would say that c of b
+is a subtype of c of a. Or, we could have the relationship where
+neither of the three was true. So neither c of a is a subtype of c of b,
+nor is c of b a subtype of the other. So if c of a is a subtype of c of b, we
+say c is covariant. If the opposite is true, so c of a is a
+super type of c of b, then we say c in contravariant.
+And if neither of the two are true, then we say c is nonvariant.
+Scala lets you declare the variance of a type by annotating the type parameter.
+So you can determine that a class should be covariant by writing a + in front of
+the type parameter, the a here. Or you could determine that it's
+contravariant by writing a minus. Or finally, if you write neither + or -,
+then the default is that C is non-variant. So c of a and c of b are unrelated.
+So here's some food for thought. Say you have two function types.
+The Type A is a function that takes IntSet to NonEmpty set, and Type B is a type that
+takes non-empty sets to general int sets. According to the Livka substitution
+principle that you've seen in the last session, which of the following should be
+true? Is A, a subtype of B, or B a subtype of A?
+Or are A and B unrelated? So I will argue that type A is a subtype
+of type B Why? Well, let's look.
+What can you do with a type b function from non-empty to IntSet?
+While the thing you can do is you is you park, can pass a non-empty IntSet, and
+receive an IntSet back. Can you do the same thing with type A?
+Well, of course, if you pass a nonempty IntSet to the type A, it expects just an
+IntSet, so a nonempty will do just fine, and you will get back a nonempty IntSet,
+which of course is a special case for our IntSet. So type A satisfies the same
+contract as type B. If you give it a nonempty set, it will
+give you back an IntSet, but it actually will satisfy more than B.
+So that's why A is a true subtype of B... So let's generalize this to arbitrary
+function types. So the rule we have is if we have two
+function types, A1 to B1 and A2 to B2, and the first is a subtype of the second, if.
+First the result types, B1 and B2, are subtypes, so they go in the same
+direction, but the argument types go in the other direction.
+So A2 must be a subtype of A1. So let's express that visually.
+So we have the supertype A2. To B2 here.
+And the presumed subtype, A1 to B1. So, what we say is that the A2 type is a
+subtype. Of a one, and B1 is a subtype Of b too,
+and that would mean that this is a. Especially the case of the a2 to b2
+function. Why would that be?
+Let's see. Lets look at the first functions, so all
+we could do is pass an argument of A2 into this function.
+Because of this sub-typing relationship we can pass the same argument also to A1
+because A2 is a sub-type of A1. Then we apply the.
+Function a-1 to b-1, that gives us a b-1 and again because of sub-typing that
+actually qualifies as a b-2. So we could easily instead of having used
+this function here, we could supply the lower function.
+Over there, and the same argument types would map to the same, result types.
+So what we've learned is that functions are actually contravariant in their
+argument types, and covariant in their result types.
+We can then express that code in Scholar, and that leads us to the revised
+definition of the function one-trade that you've seen before.
+So now I've added two variance annotations to the parameters.
+The argument type t is contravariant. It has a minus and the result type u is
+covariant. It has a plus.
+Now, can we just sprinkle minuses and pluses over classes as we please, to make
+them call a countervariant. Well obviously not because otherwise, we
+could've done the same thing with array. Make array for instance co-variant and run
+into to the problem the Java did. So there are rules when we, when can we
+annotate a type parameter with plus and with minus.
+So, to find out what the rules are, let's look at ganity array example.
+So, I, now assume that array is a class written like this one, array and update
+the updating functionality. In array is, is captured as a method
+called update. So the problematic combination was that
+the class was covariant, so the type parameter T will have a plus here.
+Whereas update took a parameter of the same type T.
+So a covariant type parameter T together with a, a method that takes a parameter of
+that type will lead to problems or did lead to problems in the array case.
+So the Scala compiler will actually check that there are no problematic combinations
+when compiling a class with variant annotations.
+Roughly, what it will do is, it will let covariant type parameters only appear in
+method results. Contravariant type parameters can only
+appear in method parameters, and nonvariant, or invariant, that they are
+used as aliases, type parameters can actually appear anywhere.
+The precise rules are a bit more involved. But fortunately this Scala compiler will
+perform them for us, so we don't need to memorize them or.
+If we go back to the function example, the checks that this Scala compiler performer
+will perform here is that the T parameter which is contravariant, is only used as a
+function parameter. That's correct.
+And the U parameter, which is co-variant, is only used as a function result, which
+is also correct. So, function one checks out okay,
+according to these checks. So now that we've seen variants, let's get
+back to the previous implementation that we did of lists.
+One shortcoming there that was that nil was modeled as a class.
+Whereas we would prefer it to be an object, after all there's only one empty
+list. Can we change that?
+Well, let's have a look at the. Example.
+So I've brought up the, list hierarchy that we've seen in previous sessions.
+What we would like to do is turn class nil into an object.
+So let's just go right ahead and do that. So objects can't have type parameters,
+because there's only a single instance of them.
+So I will delete the type parameter for the object.
+Then we get an error which says that the Type T here is not found.
+That's true because T is not longer bound as a type parameter.
+So we have to find another type In which we, which we want to use as the argument
+type of typelist. What will be a good type?
+Well, of course, we could write list of string or list of object.
+But all of that would make nil only a subtype of a partic-, specific kind of
+list. So, what we will try instead is make it a
+list of nothing. That's promising because, as we know,
+nothing is the bottom type, which is a subtype of every other type, so it's in a
+sense, universal. It can express everything else.
+But we're not done yet. To see why, let's make a little test
+object. And say, here I want to have a simple
+assignment, where I say Valex of type list of string, and that should be the empty
+list. We get an error which says it's a long
+error message. Which says, well, it found a nil, and it
+required a list of string. So obviously, nil is not a subtype of list
+of string. And then it goes on, to say, you may wish
+to define the type parameter t of list as +t instead.
+So what the compiler suggests is that, indeed, we should make list covariant.
+That we make by having a pipe parameter here.
+If we do that, then everything will type check correctly.
+So let's have a look at what happened here.
+So List of string = nil type checks, because nil is a list of nothing.
+Nothing is a subtype of string, and lists are covariants.
+So that's why list of nothing is a subtype of list of string.
+Another thing that works out very well here, is that we have seen that in the
+object little head and tail already return nothing, because they can't terminate.
+And that matches precisely the template of list.
+Because we said for a list of t, a head should return a t and tail should return a
+list of t. Now head indeed does return the element
+type here, nothing. Tail doesn't return a list of nothing but
+directly a nothing. But that's actually something that's even
+a subtype of list of nothing. So both types are very, very precise in
+what they express. To complete this session, which was quite
+a bit harder than previous sessions, I want to introduce one more thing.
+Sometimes we actually have to put in a bit of work to make a class covariant.
+So to see an example is, let's say we want to add a method prepend to our list class,
+which prepends a given element and yields a new list.
+So prepend would be defined like this. It would say, take an element of type T,
+the element type of the list, give me back a list of T, and it would have the obvious
+implementation, would create a new count cell with the given element, followed by
+the current list itself. But that doesn't work.
+Why does it not work? So.
+I leave this for you as an exercise. Why does the following code not type
+check? The Prepend method as before in a covarant
+list. Possible answers are; Prepan turns list
+into a mutable class, Prepend fails variance checking, or Prepend's right hand
+side contains a type error. What do you think?
+One way to solve this is try it out. Put Prepend, let's put Prepend into our
+worksheet and see what happens. So what we get is an error, which says
+covariant type T occurs in contravariant position in type T of value elem. What
+that says is that our co-variant type parameter T appeared as a, the type of a
+method parameter. And we've seen that, that actually
+violates the variant checking rule. So the variance checking rule, which was
+actually invented to prevent mutable, operations in covariant classes, also
+rules out something like this. Which doesn't involve any mutability at
+all. All we do is create a new list.
+Do you think that's a mistake of the, of the rules or is there some deep wisdom to
+the rules nevertheless? In fact, the Scholar Compiler is right to
+throw out lists that prepend because it does violate the lists of substitution
+principle. Why?
+Well here's something one can do with a list of type, list of IntSet, called the
+list excess. We can do excess dot prepend empty.
+Because empty of course is an IntSet. But the same operation on a list wires of
+type list of non-empty would lead to a type error.
+So if you did that wires.prependempty and you would see a type error message like
+here which says well we required a non-empty because that was the element
+type of the list but we found an empty and the two are not compatible.
+So here's something you can do with a list of IntSet that it cannot do with a list of
+non-empty set. And because we found such a thing it
+follows that according to the Liskov Substitution Principle, list of non-empty
+cannot be a sub-type of list of IntSet. Okay.
+So now we now why prepend is illegal, but Still, there's an unsatisfactory feeling
+here, because prepend is an actual method, after all, to have on immutable lists.
+So the question is, can we somehow make it variance correct?
+And, in fact, we can. And for that, we will make use of a lower
+bound. So, here is a reformulation of prepent
+which uses a lower bound for the type parameter U.
+We say prepent it takes a type parameter U which must be a super type of the list
+element type T. It takes a U element of the type U and it
+returns a list of U. And the body of prepent is as it was
+before. And actually the, the, this passes the
+variance checks. Because it turns out that co-variant type
+parameters, such as a T of list may appear in the lower bounds of Meta Type
+Parameters. Contra-variant type parameters may appear
+in the upper bounds instead. So, you can find out yourself how this
+works in detail by solving the following exercise.
+Implement prepend as shown in trait list. The question is, let's say we have a
+function that takes a list of non empty as first parameter and empty element as
+second parameter, and prepends the empty list set to the list of non empty sets.
+What would happen? The possible answers are: this would not
+type check or the result type of this function would be a list of non empty or
+maybe a list of empty or a list of IntSet or a list of any.
+The top type of all color types. What do you think?
+Now let's see how we would solve that. The straightforward way to attack this is,
+well lets try it out. Let's add the function prepend, and the
+function f, as we've seen on this slide. And if we look at function F, its type,
+and we hover over F with say. It takes a list of non-empty and an empty
+parameters as given and it returns a list of IntSet.
+So a list of IntSet is the correct answer. That still begs the explanation, why?
+So let's look first at the subtype hierarchy.
+As always we have that IntSet. Is a super type of both non-empty and
+empty. So we call the predef method on a list of
+non-empty. So, T in this case, for the predef method,
+that is nonempty. That was our, the, the parameter of the
+list. But T takes a type parameter which can be
+an arbitrary supertype of nonempty. And one thing that must happen with the
+supertype is that LM is an instance of the supertype.
+So LM the type U that is empty because that's the type of the X that we pass to
+pre-def. Is empty a subtype of non-empty?
+No, of course not. So that's why the empty value that we pass
+in here, it doesn't conform to the non-empty type.
+So what the type inferencer would choose instead is the next higher type up here.
+So that would be IntSet. Maybe you can be an Intset, and indeed,
+that would work out. The list xs, which is a list of non empty,
+is, of course, also a list of IntSet, because of covariance of lists.
+And empty is itself an IntSet. So the type inference that would determine
+that the correct type parameter for U, indeed, must be IntSet and the type that
+gets returned from Prepend a list of IntSet.
+And that's, then also the result type of f.
+So, so one thing we've seen here is that intuitively F does exactly the right
+thing. If we take a list of non-empties and we
+add an empty, the best thing that we could get out of that would be a list of IntSets
+because that's the smallest type in a manner of speaking that contains both the
+XS, the list of non-empties, as well as the additional element X which was of type
+empty. So we see that the machinery.
+With the subtype bound here, it is a little bit complicated.
+But, on the other hand, it does the exactly the right thing.
+It will lead to exactly the right invert types for data structures that contain
+elements of various different types.

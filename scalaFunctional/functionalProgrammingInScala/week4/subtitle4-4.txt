@@ -1,0 +1,169 @@
+As you know, in previous sessions we have
+already covered two forms of polymorphism. One was subtyping, which was usually
+associated with object oriented programming.
+The other was generics, which came originally from functional programming.
+Once you combine subtyping and generics, the subtle interactions that we are going
+to explore in this session and the next one.
+In particular, we're going to develop an important method in this session to find
+out when one type can be a subtype of another.
+That method is called the Liscov Substitution Principle.
+In the last session we have encountered the two principal forms of polymorphism.
+Subtyping, where we can pass instances of a subtype where a base type was required.
+And, generics, where we can parameterize types with other types.
+In this session we will look at the interactions between the two concepts.
+There are essentially two main areas to cover.
+The first one is bounds, where we can subject type parameters to sub type
+constraints. And the second is variance, that defines
+how parameterized types behave under sub typing.
+So let's look at type bounds first. As a motivating example, consider you want
+to write a method assertAllPos or assert all positive.
+That method should take an IntSet and it should return the IntSet it, itself, but
+it should check with all elements of the IntSet are positive.
+If they're not then it should throw an exception.
+What would be the best type you can give to assert all pos?
+You might come up with this type here. Assertallpos.
+Well, it would take an insert and it would return an IntSet and well, in the case
+where not all elements are positive would withdraw an exception but that's not
+reflected in the result type. And that's fine for most situations.
+But maybe one can be more precise. In fact, if we look at the behavior of a
+assertAllPos, we see that it's governed essentially by two equations that we set
+assertAllPos of empty is empty. And, assetAllPos of a non empty set is,
+well, it's either, another non empty set or rather the same that we passed in, or
+it throws an exception. So what we see in particular is that if
+assertAllPos gets an empty argument, then it would give you back an empty result.
+And if it gets a non-empty argument, it would give you back a non-empty result.
+And that knowledge is actually not reflected in this type here.
+Well we say well it takes an IntSet and gives you back an IntSet.
+So how can we capture that additional knowledge?
+So one way to express it is this way. We could say assertAllPos.
+It takes sum type S that must be some subtype of IntSet either empty or non
+empty. And a set of that type itself.
+And will return a result of the same type. So here the part that says less that colon
+insert is an upper bound of the type parameter S what it means is that we can
+instantiate S to any type argument as long as the type argument conforms to the
+bound, conforms to insert. We also will use the symbol less than
+colon outside of type bound. So generally, S < :: T will mean S is a sub-type of T.
+So we have S and we have T, and S is a sub-type of T.
+Whereas S > T means the opposite, so S is a supertype of T, or otherwise put T is a
+sub-type of S. So we've seen upper bounds where the type
+variable ranged overall subtypes of a given type.
+Scala actually also has lower bounds. So we could say a bound s is a super type
+of non-empty. And that would introduce a type parameter
+s that can range only over the super types of non-empty.
+So in our case, of the IntSet example, s could be one of either non-empty, IntSet
+AnyRef or any. You might ask where are lower bounds
+useful and it's not immediately apparent but you'll see later on in this session an
+important use case where lower bounds are indeed essential.
+Finally it's also possible to mix a lower bound with an upper bound.
+So that you would write like here. You could say s is bounded from below by
+non empty and from above by IntSet And that would then restrict any actual
+argument for s to a type that's in the interval between non empty and IntSet In
+our case, that interval actually contains only the two types, non-empty and IntSet
+because we have this inheritance relationship.
+But in general, there could have, of course, be more types between the lower
+bound and the upper bound. So now that we've have looked at bounds,
+there is still another thing to consider. So, we know that non-empty is a sub-type
+of IntSet What about if we wrap both types in a list?
+Should a list of non-empty also be a sub-type of list of IntSet?
+Intuitively, this makes sense. A list of nonempty sets is obviously a
+special case of a list of arbitrary sets. So from a domain modeling perspective,
+list of nonempty should indeed be a subtype of list of IntSets So we call
+types for which this relationship holds, covariant, because the subtyping
+relationship varies exactly like the type parameter.
+In our case then, it would make sense to make lists into a covariant type.
+The question to ask then, of course, is that a property just of list, or should
+all types be covariant, is covariance something that every parameterized type
+should be. So to get some perspective on it, let's
+look at the concept of arrays in Java, and also in C#.
+Which is, in this respect, buck for buck, comparable with Java.
+If you don't know Java or C#, then the only thing you need to know here, really,
+is that an array of elements of type T is written T brackets in Java.
+And in Scala, we actually express this slightly differently.
+We would use a normal parameter as type syntax array of T to refer to the same
+types. Arrays in Java are actually covariant,
+just like the list type we have seen. So one would have that an array of
+nonempty sets is a subtype of an array of IntSets.
+But it actually turns out that this idea of arrays being covariant causes problems.
+To see why, consider this Java snippet below.
+We create an array of non empties A, we assign it to an IntSet B, we assign empty
+into the first element of B, and we pull out the first element of A and assign it
+to a non empty. So let's visualize what goes on here.
+In the first step, we create a new array. And fill it with a non-empty element, call
+it A. In the second step we assign A to B and
+that's actually a reference assignment. So after this step, we would have another
+pointer, B, pointing to the same array. In the third step, we assign empty into
+the first element of the B array. So let me erase a non-empty value here,
+and replace it with an empty value instead.
+In the final step, we pull out the first element of the array.
+That's the empty value. And assign it into a non empty set, S.
+So what we would get is S, of type non empty, equals E.
+Now, something's clearly gone wrong here. Because we ended up assigning an empty set
+into a variable of type non-empty sets. So, if types are supposed to prevent
+something, it's precisely this. That we, that, that you can't do that.
+So what went wrong? So looking at the example again.
+The first line would execute fine. So would the second line, because arrays
+are covariant. But the third line will actually give you
+something at runtime namely and array store exception.
+So you would get a runtime exception. That protects the assignment of MT into
+this array. What actually happens it that, to make up
+for the problems caused by coherence of arrays, Java needs to store in every array
+a type tag that reflects what, at what type this array was created.
+So when we create a non empty array, the type tag would read, well, it contains non
+empty, so let me write this here. So the type tag would say, well it's
+actually a non empty array. And now that we have signed something in
+to an element of the array, we run time type of the thing we have signed gets
+checked against the type tag. So in our case here it would be have an
+empty value but the type tag would read non empty and that would give you a run
+time error. Now, it seems that this is not a very good
+deal. We have traded a compile-time error for a
+run-time error, and we have also paid the price for a run-time check that we have to
+do. Every array store has to undergo this,
+this check against the array tach. So one could argue that it was really a
+mistake to make a raised covariant that produced a hole in the type system that
+had to be patched by a run time check. And you might ask why did the designers of
+Java do it in the end. Well it actually turned out that they
+wanted to do with they wanted to be able to write a method such as sort.
+That would work for any array. So the way they would express that in the
+first version of Java, it would say the sort method would take an object array.
+And then covariance of arrays was necessary so that an array of strings or
+an array of integers could all be passed to an object array.
+Of course, with Java five and later on, you've a much better way of doing that.
+You would do it the same way as in Scholar, you would use a generic type.
+But before, because generics were not available in the earlier version of Java,
+people made do with that. Now, can we somehow generalize what we've
+learned here? When does it makes sense for a, for a type
+to be a subtype of another? And when should that rather not be the
+case? That's actually an important principle,
+first stated by Barbara Liskov that tells us when a type can be a subtype of
+another. Essentially what it says is if A is a
+subtype of B. Then everything one can do with a value of
+type B, should one should also be able to do with a value of type A.
+So we have the Type B, that's the super type.
+The Type A is the subtype. And we say, well, if we expect that we can
+do something with Bs, then we can, should be able to substitute an A for a B, and we
+can still do the same thing with an A. The actual definition Liskov used is
+actually a bit more formal, so here it is. The definition says, let Q of X be a
+property that's provable about object X of type B, then Q of Y should also be
+provable for objects Y of type A. Where A is less than B.
+So, the original formulation coached it in terms of what you can prove about objects,
+not what operations you can perform. Take what we've seen from Java back to
+Scala. Then, let's look at the problematic array
+example but now expressed in Scala. Here's how you would do that.
+Would create an array of non empty values, you would assign empty into the first
+element of the array B, so notice that array selection is expressed with
+parenthesis in Scholar, not brackets, so its really the same thing as a function
+call. And the underlying reason for that is that
+arrays are really specializations of functions in Scholar.
+If you write code like that in Scholar, then what would you expect to observe?
+Would you expect to see a type error or would you expect to see a program that
+compiles? And if you expect the type error then in
+what line would you expect it. If the program compiles, would you expect
+to it throw exception at runtime or you would you think it should run without
+exception. So, you have six choices overall.
+Make your choice. So the correct answer is, you would expect
+to see a type error in line two. Why?
+Well, because the a value was an array of nonempty.
+Where as B was an array of IntSet. But, in Scala, arrays are not covariant.
+So you would not have a subtype relationship between those two arrays.
+And that means you will get a type error. It will say, I have found an array of
+nonempty, but I have expec, expected an array of IntSet.

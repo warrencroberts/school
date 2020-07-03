@@ -1,0 +1,174 @@
+In this session, we are going to introduce sets as
+another fundamental collection type. We are then going to combine sets and
+four expressions in a classical combinatorial search problem
+namely the m-queens problem. So far all the collection that we've seen
+were sequences of some sort or another. But actually also two other fundamental
+class of collections, one is sets and the other is map, and in this session
+we're going to take a closer look at sets. Sets are actually very close to sequences. You form sets just like sequences, so
+you could write fruit equals set of apple, banana, pears, let's say,
+or s equals 1 to 6 .toSet. So, toSet is an operator that takes a
+sequence and converts a sequence to a set. Most operations on sequences
+are also available on sets, so you could try s map and
+this is called +2 anytime you would expect to see a set that goes from 3,
+4, 5, 6, 7, 8. Or you could write fruit filter where
+the fruit must start with "app," so that would give us a set of just apples. Or you could ask whether
+a set is nonEmpty, say all these operations are shared
+between sequences and sets. To find a complete set of operations,
+you could look in the class Iterable. The common super class of second sequence
+and find all the operations that are supported there, or you go and
+look up the operation same class set and you'll find, in addition,
+the operation specific to sets. The principle differences between sets and
+sequences are three. The first one is that sets are unordered. That means the element of a set
+do not have a predefined order in which they appear in the set. The second difference is that sets
+do not have duplicate elements. If I would map the set going from 1 to
+6 with the function that divides each element by 2, I would obtain the set
+that contains elements 0, 1, 2, 3. So the set of six elements
+has just shrunk to four elements because
+duplicates were removed. And the third operation is where in a
+sequence the fundamental operations would be head and tail for lists or
+indexing for vectors. For set, the fundamental operation is
+contains so, the principal operation that you can do with the set is asking
+whether there is an element in the set. So let's now use that data structure and what we've seen so far in a somewhat more
+involved problem that highlights very well the techniques that we could
+apply to combinatorial search. The problem is a well known one. So you start with a chessboard. 8 by 8 rows normally, I will draw
+a smaller version with just 4 by 4. And the problem is to place queens
+into every row of the chessboard, such that none of the queens
+is threatened by another. So one way to do that here,
+would be to place a queen here, and here, and here, and here. So now we want to develop a solution for
+chessboards of any size, not just 4 or 8. One way to solve the problem would
+be to place a queen in each row. So we start with the first row,
+place a queen there, then place a queen in the second row,
+and so on. Once we've placed a number of queens,
+we must check for the next queen in the column that it does not threaten
+any of the other queens, so that it sits in its own column and it doesn't threaten
+the other queens by following a diagonal. That's lead to an algorithm for
+solving the problem. The algorithm is recursive. It says suppose that we've already
+generated all the solutions consisting of placing k-1 queens on a board of size n. First question is how do
+we represent each solution? So the idea there is we would just
+represent it by a list of length k-1. Obtaining the numbers of
+columns between 0 and n-1. So let's see in this example
+how that would work. So I number rows and columns from 0. Something like that. And then the solution of my first three
+queens would be the list of saying the last queen that I've placed
+that was the queen in the row two. That column was 0. The one before that I placed
+was the queen in column 3, and the first queen I've placed
+in the 0 row at column 1. So that would be a partial
+solution of the three queens. I can then complete it to
+a full solution by adding another queen in this column
+2 that I've seen here. So that solution would
+evolve to the solution 2, 0, 3, 1 that you've seen on the board but, of course, in general, where there can
+be more solutions or none at all so, we're dealing not with the single
+solution here but, with sets of solution. So let's put this into
+an actual Scala program. I've opened a new work sheet,
+call it nqueens, and I've given you already the signature
+of these queens method that finds all solution to place nqueens
+on a chessboard of n rows. So the input to queens would be
+the number of rows of our chess board. And the output would be
+a set of solutions and each solution is a list of int,
+the one we've seen. So to implement the queens method, we use
+a recursive algorithm with an auxiliary method, call it place queens,
+which places a number k of queens on the board and
+produces the set of solutions. So the initial call
+would be placeQueens(n), which means we place all n and
+want to place all n queens. So now we've reduced the problem to
+how to implement the placeQueens. Well, let's deal with
+the boundary case first, if k=0, so we don't need to place any queen,
+what do we return? Well, you might be tempted to say
+return the empty set of solutions, but that's actually not quite right because
+if we're not asked to do anything, that there is a solution,
+namely, don't do anything. So that means we return just
+the empty list as our solution here. Okay, so that was the case where k=zero, so now, in the case where k is greater
+than 0, we have to do some real work. So, what do we need to do? So in general we have to place k queens, we first have to solve the sub
+problem of placing k-1 queen. So we call this for
+queens coming from place queens k-1. So that was the set of our partial
+solutions returned by placeQueens(k-1). And we let queens range over it. Now the second thing we
+would have to check for is we have to put our k
+queen into a certain column. And we'll simply try all
+the possible columns. So we would say the column
+range is from 0 until n. But, we can't place the queen
+in any column we place. Because, we still have to check that it
+doesn't threaten and the other queen. So, we put a test in there at filter
+which says that the column for the queen is safe which respect
+to the previous queens. And if it is then when we can yield a new
+solution what would that solution be? Well, it would be our partial
+solution here augmented by the queen in the new column. So it would be column followed by queens. But that gives the outline
+of our solution. There's still one thing to do
+namely define this method is safe. So I would like you to
+do that as an exercise. So the exercise for you is to write
+a function isSafe that takes a column for a new queen and an existing solution
+call it queens that returns a Boolean indicating whether it's safe to
+put the new queen in the given column. It's assumed, of course, that the new
+queen is place in the next available row after all the other place queen. So let's see how we would solve this. I've already given you the signature
+of the safe in the worksheet, the thing to do is work
+on its implementation. The first thing I want to do is I want
+to add rows to all the queens that we look at here. So the row of the queen to be placed,
+let's call it row. So that would be, simply queens.length because the other queens
+are in row 0 to row minus 1. The next thing that I want to do is I want
+to also add a row to each of these queens. So transforming the list of ints into
+a list of pairs of row and columns. So what I want to do is,
+let's say, if I have a solution. List of 0, 3, 1 partial solution. Then, I want to transform that into
+a solution that adds the rows. So, the first element was actually the
+last row to be placed, so it was row 2. So, I would get 2,0 1,3 and 0,1. So I want to go from here, to here. How could we do that? So the idea here is that we
+use a zip with a range, so the range that we want to apply here
+would be the range that goes from row-1. To 0 by minus 1 steps. And that sequence we zip
+with just the file queens. And we call that WithRow. So that would be now the partial solution
+of queens represented with rows. So what we can do now is we can simply
+check whether the queen at row row and column column here is in
+check with any of these here. So that would be for all. For all of these queens it must be
+that the new queen is not in check. So when we go through this
+partial solution their all pairs. So let's immediately take the row and
+the column out of the pair and now comes our check so
+what do we need to check here. Well, the first of this of course that
+the current column is not the same as any of the columns of
+the previous screen so that would be call different from z and
+the other thing to check is that the queen is also not
+in check over any of the diagonals. What that means is that the absolute
+difference between the two columns, we shall call that math.abs(col- c) must not be the same as the absolute
+difference between the two rows. So that's row minus r because in this case
+we know that row is always bigger than r. So in that case if that predicate is
+true then when we know that the queen is not in check over any of
+the diagonals with the queen in rc. So that's our definition of a safe. Let's try to test this
+with a simple example, let's just run queens of 4,
+and see what we get. So what we get is a list of two solutions, 1,3,0,2 and 2,0,3,1. And if you look at it, then it seems
+that the two solutions are both correct. But it's better to
+actually visualize this. So as a last step,
+I would like to add a component that shows all solutions as actual chessboards,
+so let's try to do that. I've put up a function here called
+show that takes a solution and will print it as a chessboard. We can see that immediately
+how it would work, let's call queens of 4 at
+now map with show, so for each of the solutions we want
+to see the check chessboard so that's what we get,
+we get a set of solutions. And each solution is a four line string,
+so here in this rectangle here you see the first one and
+in this rectangle you see the second one. And as you see, yes, it's true that none
+of the x's which represent the queens is in check with each of the other so their
+all on their own column in their own row. And none of them are the same, diagonal. So let's have a quick look at
+how we printed the queens here. So, what I did is I had
+a list of lines and that's just essentially
+I took the solution but I reversed it because we that in
+the solution later queens come first so we let the columns range
+over queens.reverse. And then for each of these rows
+I had to produce the string that consists of asterisks and
+the X where the queen is. So the first thing I did
+was I produced a vector with n elements that each read star and
+a space. And then I used the updated call at
+the column to replace the star and the space with an X and a space. And then I converted the whole vector
+of string elements to a string, there's a hand the utility functions also
+that make string will take any collection and simply print out all the elements
+in the collection one after the other. So, that was how we converted
+the single line to a string. To actually show a whole chessboard the
+ideas that we have to show each line and we have to separate them
+by new line characters. So, that's another usage of this make
+string which is a function that can also take a second argument. In that case it will print each lines
+separated by the second operand here, so in that case that you seen here
+lines would be separated by new lines, and I proceeded by that
+additional new line character, so that's what you saw here,
+we can even make this. Somewhat nicer by saying, instead of
+the scaffolding with the set here, I just want to convert it
+directly into a mkString. And I want to convert sets maybe by
+another new run character like that. So let's see what that would give. So now I have the solutions in a nicer
+way each nicely separated by blank lines. Let's play with it a little bit, if you
+have queens of eight then we will probably get too many solutions, yeah, that's
+a whole lot of solutions that we get here. So what we do instead is let's
+take the first three and there you would have all
+the solutions of size eight. And inspecting each of them you see that,
+yes, indeed it is a solution

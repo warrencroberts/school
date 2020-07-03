@@ -1,0 +1,6 @@
+#numpy==1.16.0
+scikit-learn==0.20.1
+scipy==1.2.0
+Theano==1.0.4
+tensorflow==1.10.0
+keras==2.2.4

@@ -1,0 +1,200 @@
+An important problem in programing is
+decomposition. Let's say you have a hierarchy of classes
+and you want to build tree-like data structures from the instances of these
+classes. How do you build such a tree?
+And how do you find out what kind of elements are in the tree?
+And how do you access the data that's stored in this elements?
+That's the problem of decomposition, which we are going to tackle in this session.
+Lets look at this with an example. Suppose you want to write a small
+interpreter for arithmetic expressions. To keep it simple, lets restrict ourselves
+for the moment to just numbers and additions as expressions.
+Such expressions can be represented as a class hierarchy.
+You'd have a base straight Expr for expressions and two sub classes, Number
+and Sum. Now if you want to explore a tree of nodes
+consisting of Numbers and Sum, you would like to know what kind of tree is it.
+Is it a Number? Is it a Sum?
+And what components has it? To be able to do that, it brings us to the
+following implementation. So here you see, I have my class
+hierarchy, I have an expression and then I have two subclasses Number and Sum.
+Now for a complete functionality of expression, if I look at an expression I
+would like to know is it a Number or is it a Sum and that's done by the first two
+methods. Here is Number and is Sum. Now, if it's a Number, then I would like
+to know the value of that Number. That would be a number, let's call it n.
+And if it's a sum, then I would know, want to know what are it's operands and that
+would be a leftOp and a rightOp field. So to do that here's the implementation of
+Number. Number is a subclass of expression and it
+would now implement all the five methods that you see here.
+In expressions, we have the two classification methods, its Number and its
+Sum, And we would have the three accessor
+methods for either Numbers or Sums, which we've numValue, which, this one applies
+only to Numbers. And leftOp, rightOp,, these ones do apply
+to sums. So to implement these five methods, what
+do we do in Number? Well, isNumber obviously is true, isSum
+obviously is false. The numeric value of a number is just the number we pass into it.
+And the left operand and right operand, they are operations that are not
+applicable to Numbers. So both of them would throw an error that says that say
+well you have called a leftOp or a rightOp method on number and that is illegal.
+So let's look at Sums next. So the idea would be that Sum of e1, e2
+would correspond to the expression that is e1 plus e2.
+Its five implementations are as follows. A Sum is clearly not a Number.
+A Sum is a Sum. The numeric number of a Sum is something
+that's not applicable, that would throw an error.
+The left operand is the first argument that we pass into Sum.
+The right operation is the second argument we pass into Sum.
+So now that we've got the basic wiring of expressions, let's do something with it.
+One thing we could do is write an evaluation function.
+So the evaluation function should take one of these expression trees and it should
+return the number that it represents. So for instance, I would like to have that
+eval of Sum of the Number one and the Number two, Should give me three.
+So how would I write an evaluation function like that?
+Well, one way to do that would be to simply ask, given an expression, what it
+is?. So, we ask this question, is it a number.
+If yes, then we can return the numeric value of that expression.
+Otherwise, if the expression is a Sum then we take, it's both two operands, the left
+operand and the right operand and we evaluate both of them using eval.
+And finally, you have to guard against the case that you might have another
+expression that is neither a Number or a Sum.
+Maybe not now, but maybe in the future, somebody will add such a subclass of
+expression. So it's prudent to have a third class
+which says well, if it's neither a Number nor a Sum,
+Then we throw an error which says I found an unknown expression and here it is.
+. Okay.
+So far so good. But there's a problem with that and that
+is that writing all these classification and access of functions quickly becomes
+tedious. We've already written fifteen method
+definitions only to do something as simple as expressions consisting of Sums and
+Numbers. And things get worse if we add other forms
+of expressions. So let's demonstrate that.
+Let's say we want to add to our expression trees two new classes.
+One that represents the product of two expressions, e1 and e2,
+So e1 times e2 would be a class product given arguments e1 and e2. and the other
+new class would be Var that represents variables.
+So variables would take a string that represents the name.
+So if you want it to continue with our scheme of classification and access
+methods, then we'd need to add new methods to, of course, those two new classes but
+also to all the classes defined above. So, a question to you.
+If we wanted to do that for Product and Var, how many new method definitions would
+we need? Here I want you to count the method
+definitions in Product and Var themselves. But also any new Accessor and
+classification methods that we have to retrofit to the existing classes, to
+Expression and Sum and Num. Possible answers would be nine, or ten,
+nineteen, or maybe 25, Or even 35, or 40.
+So to answer that question, let's look back at our existing solution.
+What we want to do now is add two new subclasses of Expression, one for Product,
+the other for Vars. And Var would have probably a name and
+Products would have essentially also leftOp and rightOp just like Sums.
+So what do we need as new methods. Well, we would need new classification
+method that tells us whether a given expression is a Product or a Var.
+So there would be some new methods called that isVar and isProdu that we would have
+to add to the trait expression and also to its subclasses.
+Now, what about the access methods? Here we would need, in addition to the Num
+value, and leftOp and rightOp, also an operation that gives us the name of a
+variable. Would we need access and methods for
+leftOp and rightOp and product? Well, you might think so, but in fact,
+it's probably better to just re-use the Accessor methods of Sum, to just say both
+products and sum. They're binary operations so they share
+the accesses for the left and right and side operance.
+So that means no new access or methods for products, just a classification method.
+And we're left with three methods in, trait Expr.
+So that means trait Expr now has eight methods and all subclasses of trait Expr,
+also needs to implement these methods. So that would mean eight methods for class
+number and eight methods for class Sum. And then, of course, we have the two new
+classes, Product and Var, which also have to implement all of the eight methods now,
+isNumber, isSum, isVar, isProd, numValue, leftOp, rightOp, and name. So that means,
+overall, we have five classes, Each of them implementing eight methods
+for a total of 40 methods. Our previous solution had three classes,
+each of them implementing five methods for a total of fifteen methods.
+So the answer to the question was, we have 25 new methods.
+So generally, if we continue with that game to extend the hierachy with new
+classes we find out that the number of methods we need tends to grow
+quadratically, and that's, of course, very bad news,
+Because it means that our, program size, and ability to understand programs, will
+quickly be exhausted, as we add new classes to the hierarchy.
+So the question is what to do about it. Can we find another solution that avoids
+the quadratic increase of methods? Well, here's one which I would actually
+call a non solution. Most languages have some form of type
+testing and type casting, and Scala let's you do that as well.
+So it has a method'is instance of' that can check whether an object's type
+conforms to T and it has a method called isInstanceOf that check whether an object
+as type conforms type T, so that would be a type cast.
+If the cast fails at one time because the object is not at run time, then it will
+throw a class cast exception. So x is instance of T is really the same
+thing as x instance of T in Java. And it's asInstanceOf is the same thing as
+a type cast, which is written like this in Java.
+. The Scala form of these type tests and
+type casts is as methods on the type class any.
+And the methods would take the type that they want to test or cast against as a
+type parameter. If you compare the Scala solution and the
+Java solution then you see that Scala solution is quite a bit longer, and you
+could argue less legible than the Java solution, and that's completely
+intentional, Because, actually it turns out that
+typetest and typecasts are very low level and unsafe and that, in fact, Scala has
+much better solutions. So, the use of type test and type cast,
+[INAUDIBLE in Scala because of sometimes useful for interoperability with Java, but
+the use is discouraged. So using type tests and type class, we
+could do something like that for eval.. We could say, okay, we have a class
+expression. and now we n-, don't need to put anything special inside expression.
+And you would simply ask: is the expression an instance of my number class?
+Then we cast it to number in that case and we pull out the num value from the number.
+On the other hand, if the expression is an instance of sum then we take the left
+operand after casting it to sum, take the right operand after casting it to sum and
+evaluate both operands, finally sum the results.
+And the third part would be as before, if it's neither, then we throw an error.
+So if we look at the solution, then the good part of it is that we don't need any
+classification methods. These instance of tests, fulfill that role
+now, And we need access methods only for
+classes where the value is defined. So that means that our base,, trait ede
+could actually be empty. Whereas number needs a num value.
+Because and some. Needs a left up and a right up.
+But number doesn't need a leftOp and a rightOp,, because we will call leftOp and
+rightOp only after casting to Sum. So, we need many fewer methods, which is
+good. On the other hand, use of typetest and
+typecast is very low level, it is unsafe because, when you do a type-cast you do
+not know necessarily at runtime whether type-cast will succeed.
+It might also throw a classcast exception. In this example, here we have actually
+guarded every type-cast by a type-test, so we can assure statistically that none of
+these casts will fail, but in general that's not assured.
+So that's why, we recommend the people to stay away from type-casts.
+So here's a solution that looks much better.
+If, after all, all we want to do is evaluate expressions, then we could have a
+direct object oriented solution for that. Instead of making eval a method which
+exists outside our hierarchy, we just write it as a method of expression itself.
+So now, what we need to do is that, in the base trait, we would have an expression
+eval which returns int, and is abstract, as usual.
+Then, for a number, the evaluation of a number would just give the number that's,
+well, that, well, passed into the class. That is the parameter.
+And to evaluate a Sum, we simply evaluate its left operand, evaluate its right
+operand, and form the sum of those two values.
+Great. So this is clearly much preferable to what
+we did so far, But what happens if we'd like to display
+expressions now. So lets assume we want to have here
+another method, call it show, that returns a string.
+At ths place the expression. Then of course we'd need to have an
+implementation of show in Number and another one in Sum.
+That's all very well, but there's one disadvantage here that we needed to touch
+all the classes in the hierarchy and add a method in each one of them.
+So we have to touch many pieces of code, which in a real system could be, for
+instance, in different source files. So any such change that adds a new message
+to our hierarchy is rather pervasive. But there's a more fundamental limitation
+of this object-oriented decomposition scheme that we've seen.
+To see that, let's assume that we don't want to evaluate an expression nor do we
+want to show it, but we want to simplify it, let's say using this rule here.
+So we want to replace sums of products with the same left operand with a product
+of sums using the usual rule of distribution.
+How would we go about doing that? Well, the problem here is we can't really
+have a simplify method in either product or sum.
+Because the simplification involves a whole subtree, not a single node.
+So it can't be encapsulated as a method of a single object without also looking at
+other objects. Like we could may be put simplify in the
+sum operation, But then it would have to look at its two
+operands and verify that, indeed, they are both products and that the left operand of
+each product is the same tree. Well,
+Doing that, we are actually back at classification and access methods, so
+we're back to square one. We need tests and access methods for all
+the different subclasses. So that shows that object oriented
+decomposition is good for some things like implementing the eval function, but it's
+can't do other things such as a non local simplification, and it might not be the
+best solution if you have many new methods that you want to introduce because you
+have to touch all subclasses every time you introduce a new method.
+In the next session, we're going to see another technique that will address these
+problems.

@@ -1,0 +1,128 @@
+This session will be concerned with
+parameterization techniques. The question is how can we make a
+definition, such as mergesort more general so that they can be used not for a
+singular argument type. We'll see in this session how
+parameterization by either functions or objects helps in this respect.
+One shortcoming of the merge-sort function we've seen last session was that it can
+only be applied to list of X. But it makes sense to, apply the same
+function or similar function also to lists of other element types such as strings or
+doubles or booleans and so on. How could we achieve that?
+Well, the most straightforward way to do that would be let's parameterize merge
+sort. So instead of int I have a type parameter
+T now. But that wouldn't work because the
+comparison function wouldn't be well-defined.
+So let's have a look at that. Here I have the merge sort that we have
+defined at the end of the last session. Let's just replace the int by a T, and
+make T a type parameter. And the same thing here for the merge,
+which takes the type parameter of the enclosing function msort, and what do we
+see? Well, we see one error here, which says
+that value less is not a member of type parameter T.
+Of course, now that our at least elements can have an arbitrary type. We can no
+longer be sure that there is, in fact, a less than function defined on elements of
+this type. So what can we do?
+Well, the next refinement of our idea would be to parameterize merge with the
+necessary comparison function. So let's see how that would work.
+We would have a polymorphic function msort with a type parameter t.
+And in addition to the list that we pass to msor we also pass a less than function
+with an lt here that takes two ts and returns a Boolean and the contract for LT
+would be that it should return the result of comparing its two elements with the
+less than. Once we have that then we have to apply LT
+in two instances. Let's see how we would do that in the work
+sheet, so I have here. I pass an LT, which takes two T's, and
+returns a Boolean. And then I can write here, instead of x
+less than y, I can write here LT of x and y, in the merge function.
+That's good, but, I have another problem here.
+For the sort here, of course, I have to pass the correct LT function into the two
+recursive calls of msort. And finally, for the numbers here, I have
+to pass the right version of LT into numbers.
+So, one way to do that would be to say, well, let's take an int X and a Y, which
+is also of int, type int, and return X less than Y.
+And that would compile. And if we run it, we get the same result
+as before. What we can do now is we can also add a
+data of another type. Let's call, let's say fruits.
+That would be a list of let's say, apple. Pineapple,
+Orange, and banana. And we can now apply msort to the fruits
+list. All we have to do is pass the right
+comparison function. So this one here would take two strings.
+And it will return the result of the Java call x compared to y, and that, that must
+be less than zero. So compare to is a method on Java string
+which returns minus one if the first string is less than the second string, a
+zero if they're equal, and one if the first one is greater than second one.
+So since we want minus one, we have to test here less than zero.
+Let's run the worksheet, and we see that indeed, our list of fruit has been sorted
+in lexical, graphical order. In fact, we can simplify the, calls here
+further, because the types of the two function values are not necessary.
+We can leave them out and the Scala compiler will infer them.
+So we could also write something like that, and, That would give us the same
+list obviously. And we could also leave the types out in
+the second function values of the strings. The reason why that works is that this
+kind of compile is figure out, it's able to figure out that X and Y need to have
+type int by simply analyzing the call of M sort of nums, because nums is a list of
+int. It will therefore know that the type
+parameter of M sort must be int and that will determine in turn the types of the
+function parameters here. That discussion shows that it's usually
+advantages if you have several parameter lists and one of them is a function value,
+to put the function value last. Cuz then you have a better chance that the
+type's already inferred by the time the compiler will type check the function
+value and that means you don't have to write them explicitly.
+So, so far, we have parameterized the merge sort function with our own less than
+operation, which is perfectly possible, but on the other hand, we could also use a
+predefined class. There is already a class in the standard
+library that represents orderings with less than function, but also all the
+other, all ordering functions like greater than, less than or equal, and so on.
+That class is called scala.math.ordering of T.
+So the type parameter T tells us what's the type of the elements that are compared
+in the ordering class. Instead of parameterizing with the less
+than function directly, we could also parameterize msort with ordering instead.
+So, wouldn't be much that we have to change.
+So in the worksheet, we'll have a look at it.
+So instead of less than, we would have a paramenter ord of type ordering of t.
+We should import that first. Import math dot ordering.
+And then instead of the less than call here we would call the less than method of
+our ordering type. And instead of passing less than along, we
+can pass order along. And in our, actual calls, we can now use,
+the predefined orderings, but the first one would be ordering.int.
+That's the ordering on integers that is defined as a value in the ordering object,
+and for the other one, it would be ordering.string.
+And the results are the same as before. Unsurprisingly.
+So, there's one remaining problem in. Passing a round piece LT or all values are
+rather cumbersome. Would be much nicer if we could somehow
+synthesize the right comparison operation directly just given the type T.
+And we can make it at least appear that way by avoiding passing or implicit,
+explicitly making it an implicit parameter.
+So the only thing here is that we write implicit ord cut orderings.
+So all I do now is I write implicit in front of the.
+What parameter. Nothing changes so far, but what it means
+is that I can now leave out the actual, parameter in a, in a call, and the
+compiler will synthesize one for me. So I can leave out the ort here, and I can
+leave out the ort there. And I can even leave out arch in the
+ordering.int or the ordering of string and everything would still compile and run as
+before. So I can get rid, get rid of the ordering
+of string as well and its still the same thing.
+So now my program is just as concise and nice as in the case of list of int's but
+it is fully parametric. How did that happen?
+How, how could we achieve that? Well, what actually happens is that when
+you write an implicit parameter, and you don't write an actual argument that
+matches that parameter, the compiler will figure out the right implicit to pass,
+based on the demanded type. So what are the precise rules for that?
+So let's say a function takes an implicit parameter of type T.
+The compiler will then search for an implicit definition.
+So that's a parameter or a vowel or an object that's marked implicit.
+And that has a type that's compatible with T.
+And finally, it's visible at the point of the function call.
+Or it's defined in the companion object associated with T.
+So in our case. Here we have the first word that we left
+out here that was visible at the point of the function call, because the word here
+is visible where as the orderings that we left out here, they were defined in the
+companion object of the ordering class and therefore also qualified as implicit
+arguments. So once the compiler has done that search,
+if it comes back with a single more specific definition, that definition will
+t-, be taken as the actual agrument. So the arg-, that will be the synthesized
+argument for the implicit parameter. And otherwise, if the compiler finds
+nothing or if it finds several possible candidate definitions, then it's an error.
+So let's test your understanding with a simple quiz.
+Consider the line in the definition of msort where you have the two recursive
+calls. So that would be this line here.
+Which. Definition of ordering is implicitly
+inserted by the compiler here and here.? Is it ordering.int, or ordering.string, or
+the Ord parameter of the N sort function?

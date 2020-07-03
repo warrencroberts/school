@@ -1,0 +1,220 @@
+To recap, the fundamental types you've
+seen in the previous sessions were primitive types, functions and classes.
+It's fair to ask whether these three forms of types are necessary or whether we could
+express maybe our types as classes? We'll discuss that question in this
+section and the next one. First in this session we'll look at
+primitive types and see how they can be represented as classes.
+So, so far we've seen Scala as a functional programming language.
+I'm now going to argue that Scala is actually also object oriented, and that
+it's object oriented and that it's object oriented in a very pure form.
+So a pure object oriented language, the definition would be one in which every
+value is an object, and also every operation is then essentially a method
+call on some object. If the language is based on classes this
+means that the type of each value would be a class.
+So now lets ask ourselves, is color pure object oriented language?
+At first glance there seemed to be some exceptions.
+For instance we have seem primitive types such as [UNKNWON] and double of these
+objects. We've also seen functions.
+They don't look like objects at first glance, but lets look somewhat closer.
+Let's look at the primitive types first. So the standard classes such as Int or
+booleans conceptually they actually don't receive any special treatment in Scala.
+You can treat them just like other classes you find in the packaged Scala subclasses
+of class eneval. It's true that for reasons of efficiency
+in the Int this scala compiler will represent the values of types scala Int
+say by 32-bit integers, the values of type scala booleans by java booleans and so on.
+But that, you could treat simply as an optimization and as a measure to improve
+the interoperability between Scala code and Java code.
+Conceptually, these things can be treated just like normal classes.
+And instances of integer can, or Boolean can be treated just like normal objects.
+So let's see how this could be done. You know that the Boolean type maps to the
+JVMs primitive type Boolean. But one can define it as a class without
+any changes in the user code from first principles without resort to primitive
+Booleans. Here's how this could be done.
+We put it in a package idealized Scala to make clear that's actually, the class
+Boolean that is not the same as the primitive type that we use in normal
+Scala. That class Boolean here, then.
+It would have one abstract method which we call ifThenElse. It's a parameterized
+method. It, it contains a type parameter T and the
+then part, Which I- I'm calling here simply T, and an
+Else part. Both the Then part and the Else part take
+an expression of type T. And the result of the ifThenElse, then,
+would be T. So the idea would be that I would write,
+instead of if some condition, Boolean condition.
+And then some then expression Else, Else expression.
+I would translate that to the if then else method call of my condition,
+So it would be condition.ifThenElse, Then whatever type t-e and e-e would have
+I'm leaving that out. And I'll pass t-e and e-e as the two
+arguments to the ifThenElse method. That will be the translation for
+simulating Booleans. Now once I have ifThenElse, how would I
+define the other operators on Booleans like the conjunction and disjunction,
+double am- ampersand. Actually turns out that all the other
+operations on Booleans can be defined in terms of ifThenElse.
+So let's look at && for instance. The & operation would take another
+boolean, or rather an expression of type boolean, because we know that it will be
+evaluated in a short-circuited fashion. And it would then call ifThenElse with x
+and false. So what this means is that, if the Boolean
+itself is true, then you would return the second argument,
+The Boolean argument x. On the other hand, if the left hand
+operant, the Boolean here itself is false, then the result is immediately false.
+And the same tricks you can also apply to all the other methods on Booleans.
+So for instance, for the disjunction here, you'd again take the call by name
+parameter x, that's the right hand operand.
+And it says, well, if the Boolean itself is true, then the result is immediately
+true. Whereas if the, the boolean itself is
+false, then the result is whatever the right hand side argument is.
+The third one would be the not-negational operation, which we write here as
+unary-not. So unary-not would simply be implemented
+as ifThenElse false, true, that means if the Boolean itself is true, we return
+false. If the Boolean itself is false, we return
+true. Let's look at the equality and disequality
+next. We would say well, if, to find out whether
+two Booleans are equal, we can go to the ifThenElse method.
+And say, well, if the Boolean itself is true, then the result is whatever the
+argument is. So, if the argument is also true, then the
+result would be true. If the argument is false, then the equals
+test would be false. So the result of the equals test is
+exactly the same as the value of the argument.
+On the other hand, if the current Boolean is false then the result would be the
+negation of the argument. Let's again go through the, the
+possibilities. So we say the current Boolean is false,
+the argument is false then the equality test should give true.
+And, here we would have the negation operator on the argument false, so we
+would get true, that's correct. If the argument on the other hand is TRUE,
+the, the result should be FALSE. False equals to TRUE get FALSE and again,
+here TRUE.unary bang gives FALSE. And, for not equal, it is completely
+analogous. So once we have that outline, we still
+have to define the Boolean constants false and true.
+By now, it should be clear that the, this false and this true.
+They can't be the primitive Booleans. Because we passed them to an ifThenElse
+together with one of our idealized Booleans.
+So false and true must themselves be constants of type idealized Scala Boolean.
+So here's how we would define them. Each of those of would be an object, and
+for the true constants, the only thing I need to do is define what the definition
+of ifThenElse should be for that constant. So what is the definition of if , true,
+then.then Expression Else, Else expression.
+Well, we've seen the rewrite tool. We've decided that would be then, Then
+expressions.. So what you see here is precisely the
+implementation of that rewrite tool. We say ifThenElse so for Then expression
+and then Else expression gives us the Then part.
+And conversely ifThenElse of a Then part and an Else part in the false constant
+would give us the Else part. That's all there is to it.
+So, let's do an exercise. Let's complete the definition of Booleans
+with a, a comparison operator that shows how we would compare two Booleans with a
+less than operation. And we assume for this that, the order is
+that false, the value false would be less than the value true.
+So, let's see how we would do that. So what we are after is in our class
+Boolean. You want to define to a method def less,
+which takes an x of type Boolean And which calls if ifThenElse because that's all we
+ever can do with some arguments. So what should the arguments be?
+Well, lets go through the motions if the current Boolean is true then we go in the
+Then part. So the left-hand side is true then
+obviously the left-hand side can never be less than the other one.
+So we would return false. On the other hand, if the current Boolean
+is false, then the less operation yields true.
+If the argument is true, false if it is false.
+So it is the same as the argument expression, x.
+So here, you have the solution for the less operation.
+And of course, all the other comparison operators less than or = is greater than
+or equals greater would behave in analogous ways.
+But now that we have boolean, let's look at class int.
+Don't worry, I won't give you a full implementation of class int that will be a
+bit too involved. But here's at least what's a partial
+specification what methods it would support.
+Let's start with plus. So, the int class would have a method plus
+that takes an other int and yields an int. But actually, you can also write an
+expression such as one + 2.0. And you would expect the result to be a
+double. So there's another operation that takes a
+double, and yields a double end for the motor operations, for floats and longs as
+well. In each case, the result type is the high,
+the, the greater type of the left hand operand, or the right hand operand.
+So, now we have plus and you do exactly the same thing for minus for
+multiplication, for division and modulo. The one thing I haven't said explicitly
+yet is that Scala has overloading very similar to what Java had.
+So, it's perfectly possible to have four versions of the plus method that all take
+different arguments. The Scala compiler would then figure out
+what method to, to call based on the type of the actual arguments in the method
+call. Other operations we see on this slide are
+the left shift operation, which takes shift count and gives you back an int, and
+bit wise and operations that work with either long arguments or int arguments.
+And finally, there are equality operations that would also then take a range of
+arguments like ints, doubles, floats, and longs, and give us Boolean results.
+So you see that all the operations on ints can be expressed as methods, if you just
+look at the signatures. But, the question remains, can we also
+implement them without resorting to primitive integers, to primitive types.
+So, the question is, can we maybe implement all of programming using just
+objects and functions? No primitive types at all.
+So we want to do that for class int but as an exercise I would like you to try that
+for something slightly simpler a class of natural numbers.
+So that's just integers starting from zero and positive integers but not negative
+integers and I also assume that in this class has only a sub-set of the operations
+that you would assume for int's. So, the methods I'd like you to implement
+are five. The first is, the test is zero, which
+tests whether a given natural number is zero.
+The second is predecessor, which should return for a positive natural number, the
+one before that, and should throw an exception if the natural number is zero.
+The successor, which gives you the next natural number after the current natural
+number. And finally, addition and subtraction
+operations on natural numbers. Again, for the subtraction, you, I would
+assume that the code will throw an exception if the result is negative.
+So, you should not use the standard primitive classes in your implementation
+neither int nor any other primitive class. Instead you should implement a sub object
+in the subclass. Call it zero and successor.
+So, the zero object would represent the number zero, where is the successor of n
+would represent the natural number that's one bigger than the argument and here.
+I should say that this quiz is quite a bit more involved than previous quizzes.
+So, you'll need some time to get it right. But, it's worth it for, I believe for the
+insight that you will gain from it. So let's see how we would solve this
+problem. I've already, created a class net with the
+signatures that we've discussed in Eclipse.
+And all we need to do now is create the zero object and the successor class.
+Let's start with the zero object, so. So the zero object would extend not.
+And we need to implement all our five operation,
+Iszero obviously would return true. Predecessor for the zero object that
+doesn't exist so we throw an exception. If you don't know which exception to throw
+we can always throw error, Which says maybe 0.predecessor. Successor,
+Would be. Well, you will need the second class,
+which is called successor off the current value.
+This. And then we have plus and minus.
+And I leave that out for the moment. Let's turn to the class successor.
+So it takes a given, natural number. That's the predecessor, and it's also an
+extension of Not. So we need to implement its operations.
+Is zero, obviously is false The predecessor of the current number would
+be. Well, it would be the number that we pass
+into, the successor because the successor represents the number one plus the given
+number here. So it's predecessor is N.
+The successor would be new successor of this.
+That's just like in the empty number. So what we see here is that actually, we
+have some duplication where we say. No matter whether the number is zero or
+successor, the successor of this number is always new successor of this.
+So what we can do is, we can actually do a refactoring, and move that up here.
+In the base class, because it holds uniformly for both of the subclasses.
+So let's see whether we can do the same thing for plus and minus.
+So let's turn to addition. Zero plus some natural number would be,
+well, just the natural number we pass here.
+That was easy. Let's try to do the same thing for
+successor zero plus some natural number Not would be.
+Well what, what do we do in that case? What we can do, is we can have a recursive
+call, N plus that. And that would give us a number that was
+one smaller than the sum because our current number is one larger than N.
+So all we need to do is we need to create the successor of that.
+And that would be the result. So let's turn to the minus operation.
+In the case of zero minus some natural number, we would have two cases, if the
+argument is zero. Then we return a zero, which is just in
+this case, the number itself, and otherwise we would go in to the negatives
+so we can again throw an error. Let's look at the case for minors in
+successor. So how would we go about that well one
+tempting thing would be to do it as plus. You say, well, it would be at the
+successor of N minus the natural number. But that wouldn't be correct, because that
+would mean that we would essentially go down here until we hit zero, but then we
+would throw an exception. So, we need to find another way to do it.
+So the idea here is that we start with N, and then we subtract the predecessor of
+the argument. So that would work because now N is one
+smaller than the current natural number here, where as that the previous asset is
+one smaller than the argument. So we take one of both sides so the result
+of the subtraction is the same as the original subtraction.
+You've seen that, that gives us a complete and rather concise definition of natural
+numbers. Form first principles, we didn't need
+anything else in there. There's actually a technical term for this
+construction. It's called piano numbers.
+And starting from these piano numbers we could also implement and further the
+integers so including negative numbers and even floating point numbers.

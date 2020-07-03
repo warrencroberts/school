@@ -1,0 +1,117 @@
+In this session we'll come back to what we
+did in the last one. Namely, proving equational properties of
+programs using structural induction. We will practice the newly learned
+techniques in a somewhat larger proof. For a more difficult example let's
+consider the reverse function. We pick its inefficient definition here
+because it's more amenable to equational proofs.
+So as defining process we would have nil reverses nil and x followed by XS reverse
+is the reversal of the list xs followed by the element X. These two equations are as
+we know equivalent to the more efficient version of fork left and closer to what we
+want to prove. So we pick them which of course does not
+prevent us from using at one time the more efficient definition of reverse.
+So what we would like to do is prove the proposition that XS reverse of reverse is
+XS. So to prove this it's an obvious induction on the list excess, the base
+case is really easy. Nil reverse, reverse is the same thing as nil reverse by the
+first law of reverse which says that nil dot reverse is nil and then we again
+invoke the first law To show that, that expression now is the same as nil, which
+establishes the proposition. Let's look at the induction step so here
+we would have X followed by XS, and then a double reverse.
+What can we do with that? Well, we can apply the second clause of
+reverse, which would mean that this expression here would, can be rewritten to
+the right-hand side, excess.reverse followed by X.
+And then we have our reverse on both sides here.
+What else can we do? Well,
+That doesn't seem to be anything obvious. So let's turn to the right hand side.
+The right hand side would read simply X followed by XS.
+So what can we do that? Well, one thing we could do is apply the
+induction hypothesis which says that the list xs is the same as the list xs
+reverse, reverse. So then we are left with x followed by xs
+reverse, reverse and again, there's not much we can do anymore to this side here.
+So both sides, unfortunately, have simplified to different expressions.
+This expression here and I've that expression there.
+So we still need to show that the two sides are the same and proving it directly
+by induction doesn't work as we have seen. What we can try instead is, we can
+generalize this equation. So the idea is that, instead of just
+saying excess to dot reverse here and here.
+We replace that with. An arbitrary list ys.
+So our new lemma that we want to prove is for, that for any list ys, ys followed by
+x reverse is the same as x followed by ys.reverse. And to prove that equation, we
+can use a second induction argument, this time on the list bias so let's try that.
+So, let's look at the base case first. So here, YS equals nil and the equation we
+want to show is that nil followed by x.reverse is the same as x followed by
+nil.reverse. That's the instansation of the lemma that
+we want to show here. So, what could we do with the left hand
+side here? Well,
+By the first close of plus, plus, nil is a left unit, so this thing simply simplifies
+to list of x.reverse. reverse. Then the next step would be to expand what
+list of X is. So list of X, as we know by its
+definition, is X followed by nil. In the next step then, we would involve
+the second clause of reverse to arrive at this expression here.
+When actually there's one intermediate step that we have to do here.
+So by the second clause of reverse, what would we get?
+We would get the list that follows the head element first so there would be
+nil.reverse Followed by, this suffix and now we can simply find nil.reverse by the
+first clause of reverse is just nil. Where as list of x expands to x followed
+by nil. So, that's how we arrive, at this
+expression here. Now what we can do here is we can again
+invoke the first clause of plus, plus to say nil is a left unit and we're just left
+with x followed by nil. There's one more step to do.
+Again by the first clause of reverse we know that nil.reverse is nil.
+Or we've just now used this equation backwards from going from nil to
+nil.reverse And that's the right hand side if you want to show here.
+So we get equality here and the base case is established.
+Let's look at the inductive step. What we need to do here is show that y
+followed by ys, that's our list, followed by x reverse is the same as x followed by
+then y followed by ys reversed. So let's see how we would go about that
+let's work on the left hand side here. First thing we can do is we can pull out
+the y from its binding with the list YS, using the second list of comcat.
+So we have the Y as a head element here, and then the list YS, followed by list of
+X. The next thing we can do is we can invoke
+the law of reverse, which says well reverse of a list that starts with Y is
+the same as reversal of the rest of the list here.
+And the y becomes the last element of the new list.
+The next thing we can do is apply the induction hypothesis because we see here
+that the expression ys followed by list x reverse, that's the left hand side of the
+equation with just the list ys and we can assume that, that, that, that equation
+holds. So we can rewrite it to the right hand
+side of the equation which will be x followed by yes.reverse. Now we can apply
+the first clause of plus, plus to pull out the accelerant.
+And we can apply the second clause of reverse to establish that Y followed by ys
+reverse, is the same as ys reverse followed by a list of y.
+And again we have equality here. So the auxiliary equation is established
+and because the auxiliary equation was the last thing was needed to prove the main
+proposition, that accessory versus success, we adapt.
+So the proof methodology you have seen here, worked in essentially three steps We
+could apply a defining equation, either of reverse or contact and we could apply it
+in two different ways. So.
+What you've seen here, for instance, going from here to here that was, we invoked the
+equation left to right. The, that was the second clause of plus,
+plus, which says plus, plus on a list, with a head element y is the same thing
+as, a list that starts with y. So we can pull out the y.
+And that step is called typically, an unfold step.
+The other, equation of resending step was what you've seen here in the last step
+where we have applied an equation backwards.
+The equation for reverse right. Y followed by ys reverse is ys reverse
+followed by this stuff. Y.
+And that is called a forward step. So what's important here is that these
+equations are real equations in the mathematical sense.
+They can be applied both way-, both ways. They're commutative.
+And the last step that we typically do in an, a proof like that is apply the
+induction hypothesis. So the proof method that we've seen is
+sometimes called the fold-unfold method. For equational proofs of functional
+programs. So, we finish the session with an
+exercise, which is a bit more involved than the previous ones, and, it's open
+ended, so I won't give you a solution immediately.
+So what I want you to do is, prove another law that's useful, that relates map, and
+concatenation. So the law says that, essentially the, a,
+a, map distributes over concat. For any lists XS, YS and function F, XS
+followed by YS and then map the function is the same thing as mapping the function
+over XS, mapping it over YS, and concatenating the results.
+What you need for the proofs is the classes of plus, plus, that you've seen,
+as well as two classes for maps that you see here.
+So, again, they derive directly from the definition of map.
+First clause says to map a function over the empty list, you would get the empty
+list. The second clause says that to map a
+function over a list consisting of x followed by xs.
+What you get is f applied to the head element x followed by the result of
+mapping f over the rest of.
